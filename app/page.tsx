@@ -1,6 +1,10 @@
 "use client";
 const VERSION_LABEL = "2026년 04월 01일 08시 업데이트된 버전";
 
+<div className="rounded-2xl border border-blue-200 bg-blue-50 px-5 py-4 text-sm font-semibold text-blue-900">
+  {VERSION_LABEL}
+</div>
+
 import React, { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
