@@ -1,4 +1,5 @@
 "use client";
+const VERSION_LABEL = "2026년 04월 01일 08시 업데이트된 버전";
 
 import React, { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
