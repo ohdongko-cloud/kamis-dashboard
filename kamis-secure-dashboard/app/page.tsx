@@ -184,6 +184,23 @@ type PresetRow = {
   source: string;
 };
 
+type DailyRow = {
+  regday: string;
+  price: number;
+  itemname: string;
+  kindname: string;
+  countyname: string;
+  marketname: string;
+  yyyy: string;
+};
+
+type MonthlyRow = {
+  month: string;
+  price: number;
+  yyyy: string;
+  caption: string;
+};
+
 function cleanNumber(value: unknown) {
   if (value === null || value === undefined) return null;
   const n = Number(String(value).replace(/,/g, "").trim());
@@ -204,41 +221,41 @@ function buildQuery(params: Record<string, string | number | null | undefined>) 
   return search.toString();
 }
 
-function normalizeDailyResponse(json: any) {
+function normalizeDailyResponse(json: any): DailyRow[] {
   const root = json?.data ?? json?.price ?? json;
   const items = root?.item ?? root ?? [];
   const arr = Array.isArray(items) ? items : [items];
 
   return arr
     .filter(Boolean)
-    .map((row: any) => ({
-      regday: row.regday ?? row.date ?? "",
-      price: cleanNumber(row.price),
-      itemname: row.itemname ?? "",
-      kindname: row.kindname ?? "",
-      countyname: row.countyname ?? row.marketname ?? "",
-      marketname: row.marketname ?? "",
-      yyyy: row.yyyy ?? "",
+    .map((row: any): DailyRow => ({
+      regday: String(row?.regday ?? row?.date ?? ""),
+      price: cleanNumber(row?.price) ?? 0,
+      itemname: String(row?.itemname ?? ""),
+      kindname: String(row?.kindname ?? ""),
+      countyname: String(row?.countyname ?? row?.marketname ?? ""),
+      marketname: String(row?.marketname ?? ""),
+      yyyy: String(row?.yyyy ?? ""),
     }))
-    .filter((row) => row.regday || row.price !== null);
+    .filter((row) => row.regday || row.price !== 0);
 }
 
-function normalizeMonthlyResponse(json: any) {
+function normalizeMonthlyResponse(json: any): MonthlyRow[] {
   const root = json?.price ?? json?.data ?? json;
   const items = root?.item ?? root ?? [];
   const arr = Array.isArray(items) ? items : [items];
 
   return arr.flatMap((row: any) => {
-    const months = Array.from({ length: 12 }, (_, i) => {
+    const months: MonthlyRow[] = Array.from({ length: 12 }, (_, i) => {
       const idx = i + 1;
       return {
         month: `${idx}월`,
-        price: cleanNumber(row[`m${idx}`]),
-        yyyy: row.yyyy ?? "",
-        caption: row.caption ?? "",
+        price: cleanNumber(row?.[`m${idx}`]) ?? 0,
+        yyyy: String(row?.yyyy ?? ""),
+        caption: String(row?.caption ?? ""),
       };
     });
-    return months.filter((m) => m.price !== null);
+    return months.filter((m) => m.price !== 0);
   });
 }
 
@@ -492,8 +509,8 @@ export default function KamisPriceDashboard() {
     convertKgYn: "N",
   });
 
-  const [dailyRows, setDailyRows] = useState(DAILY_MOCK);
-  const [monthlyRows, setMonthlyRows] = useState(MONTHLY_MOCK);
+  const [dailyRows, setDailyRows] = useState<DailyRow[]>(DAILY_MOCK);
+  const [monthlyRows, setMonthlyRows] = useState<MonthlyRow[]>(MONTHLY_MOCK);
 
   const allPresets = useMemo(() => [...BUILTIN_PRESETS, ...userPresets], [userPresets]);
 
@@ -559,7 +576,7 @@ export default function KamisPriceDashboard() {
   }, [productOptions, dailyForm.itemCategoryCode, dailyForm.itemCode]);
 
   const dailySummary = useMemo(() => {
-    const prices = dailyRows.map((d) => d.price).filter((v) => v !== null) as number[];
+    const prices = dailyRows.map((d) => d.price);
     if (!prices.length) return null;
     return {
       min: Math.min(...prices),
@@ -570,7 +587,7 @@ export default function KamisPriceDashboard() {
   }, [dailyRows]);
 
   const monthlySummary = useMemo(() => {
-    const prices = monthlyRows.map((d) => d.price).filter((v) => v !== null) as number[];
+    const prices = monthlyRows.map((d) => d.price);
     if (!prices.length) return null;
     return {
       min: Math.min(...prices),
@@ -734,13 +751,13 @@ export default function KamisPriceDashboard() {
           if (!response.ok) return null;
 
           const json = await response.json();
-          const rows = normalizeDailyResponse(json).filter((row) => row.price !== null);
+          const rows = normalizeDailyResponse(json);
           if (!rows.length) return null;
 
           const latest = rows[rows.length - 1];
           return {
             region: getRegionKeyFromName(region.label),
-            latestPrice: latest.price as number,
+            latestPrice: latest.price,
             latestDate: latest.regday,
           };
         })
