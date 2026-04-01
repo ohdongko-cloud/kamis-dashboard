@@ -1,44 +1,50 @@
 import { NextRequest, NextResponse } from "next/server";
 
-function buildKamisUrl(searchParams: URLSearchParams) {
-  const type = searchParams.get("type") || "daily";
-  const action = type === "monthly" ? "monthlySalesList" : "periodWholesaleProductList";
-  const certKey = searchParams.get("p_cert_key") || process.env.KAMIS_CERT_KEY || "";
-  const certId = searchParams.get("p_cert_id") || process.env.KAMIS_CERT_ID || "";
+const KAMIS_BASE_URL = "https://www.kamis.or.kr/service/price/xml.do";
 
-  const params = new URLSearchParams({
-    action,
-    p_cert_key: certKey,
-    p_cert_id: certId,
-    p_returntype: "json",
-  });
-
-  searchParams.forEach((value, key) => {
-    if (["type", "p_cert_key", "p_cert_id"].includes(key)) return;
-    if (value !== "") params.set(key, value);
-  });
-
-  return `https://www.kamis.or.kr/service/price/xml.do?${params.toString()}`;
-}
-
-export async function GET(request: NextRequest) {
+export async function GET(req: NextRequest) {
   try {
-    const url = buildKamisUrl(request.nextUrl.searchParams);
-    const response = await fetch(url, { cache: "no-store" });
-    const text = await response.text();
+    const { searchParams } = new URL(req.url);
 
-    if (!response.ok) {
-      return NextResponse.json({ error: `KAMIS API 호출 실패: HTTP ${response.status}`, raw: text }, { status: response.status });
+    const upstream = new URL(KAMIS_BASE_URL);
+
+    searchParams.forEach((value, key) => {
+      if (value !== "") upstream.searchParams.set(key, value);
+    });
+
+    if (!upstream.searchParams.get("p_returntype")) {
+      upstream.searchParams.set("p_returntype", "json");
     }
 
+    const response = await fetch(upstream.toString(), {
+      method: "GET",
+      cache: "no-store",
+      headers: {
+        Accept: "application/json, text/plain, */*",
+      },
+    });
+
+    const text = await response.text();
+
     try {
-      return NextResponse.json(JSON.parse(text));
+      const json = JSON.parse(text);
+      return NextResponse.json(json, { status: response.status });
     } catch {
-      return NextResponse.json({ error: "KAMIS 응답을 JSON으로 파싱하지 못했습니다.", raw: text }, { status: 500 });
+      return NextResponse.json(
+        {
+          error: "KAMIS 응답을 JSON으로 파싱하지 못했습니다.",
+          status: response.status,
+          raw: text,
+          requestedUrl: upstream.toString(),
+        },
+        { status: 502 }
+      );
     }
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "알 수 없는 오류가 발생했습니다." },
+      {
+        error: error instanceof Error ? error.message : "Unknown error",
+      },
       { status: 500 }
     );
   }
