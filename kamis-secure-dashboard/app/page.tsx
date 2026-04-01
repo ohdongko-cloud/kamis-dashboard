@@ -33,7 +33,7 @@ const STORAGE_KEYS = {
   presets: "kamis_user_presets",
 };
 
-const VERSION_LABEL = "2026년 04월 01일 10시 업데이트된 버전";
+const VERSION_LABEL = "2026년 04월 01일 11시 업데이트된 버전";
 
 const REGION_OPTIONS = [
   { label: "전체지역", value: "" },
@@ -172,70 +172,26 @@ type MapPriceRow = {
   latestDate: string;
 };
 
+type DailyCompareRow = DailyRow & {
+  compareDate: string;
+  priorPrice: number | null;
+  changeRate: number | null;
+};
+
+type MonthlyCompareRow = MonthlyRow & {
+  priorYear: string;
+  priorPrice: number | null;
+  changeRate: number | null;
+};
+
 const DAILY_MOCK: DailyRow[] = [
-  {
-    regday: "2026-03-24",
-    price: 4620,
-    itemname: "오징어",
-    kindname: "냉동",
-    countyname: "서울",
-    marketname: "가락시장",
-    yyyy: "2026",
-  },
-  {
-    regday: "2026-03-25",
-    price: 4680,
-    itemname: "오징어",
-    kindname: "냉동",
-    countyname: "서울",
-    marketname: "가락시장",
-    yyyy: "2026",
-  },
-  {
-    regday: "2026-03-26",
-    price: 4710,
-    itemname: "오징어",
-    kindname: "냉동",
-    countyname: "서울",
-    marketname: "가락시장",
-    yyyy: "2026",
-  },
-  {
-    regday: "2026-03-27",
-    price: 4690,
-    itemname: "오징어",
-    kindname: "냉동",
-    countyname: "서울",
-    marketname: "가락시장",
-    yyyy: "2026",
-  },
-  {
-    regday: "2026-03-28",
-    price: 4740,
-    itemname: "오징어",
-    kindname: "냉동",
-    countyname: "서울",
-    marketname: "가락시장",
-    yyyy: "2026",
-  },
-  {
-    regday: "2026-03-29",
-    price: 4760,
-    itemname: "오징어",
-    kindname: "냉동",
-    countyname: "서울",
-    marketname: "가락시장",
-    yyyy: "2026",
-  },
-  {
-    regday: "2026-03-30",
-    price: 4780,
-    itemname: "오징어",
-    kindname: "냉동",
-    countyname: "서울",
-    marketname: "가락시장",
-    yyyy: "2026",
-  },
+  { regday: "2026-03-24", price: 4620, itemname: "오징어", kindname: "냉동", countyname: "서울", marketname: "가락시장", yyyy: "2026" },
+  { regday: "2026-03-25", price: 4680, itemname: "오징어", kindname: "냉동", countyname: "서울", marketname: "가락시장", yyyy: "2026" },
+  { regday: "2026-03-26", price: 4710, itemname: "오징어", kindname: "냉동", countyname: "서울", marketname: "가락시장", yyyy: "2026" },
+  { regday: "2026-03-27", price: 4690, itemname: "오징어", kindname: "냉동", countyname: "서울", marketname: "가락시장", yyyy: "2026" },
+  { regday: "2026-03-28", price: 4740, itemname: "오징어", kindname: "냉동", countyname: "서울", marketname: "가락시장", yyyy: "2026" },
+  { regday: "2026-03-29", price: 4760, itemname: "오징어", kindname: "냉동", countyname: "서울", marketname: "가락시장", yyyy: "2026" },
+  { regday: "2026-03-30", price: 4780, itemname: "오징어", kindname: "냉동", countyname: "서울", marketname: "가락시장", yyyy: "2026" },
 ];
 
 const MONTHLY_MOCK: MonthlyRow[] = [
@@ -275,12 +231,25 @@ function formatWon(value: unknown) {
   return `${n.toLocaleString("ko-KR")}원`;
 }
 
+function formatRate(value: number | null) {
+  if (value === null || Number.isNaN(value)) return "";
+  return `${value > 0 ? "+" : ""}${value.toFixed(1)}%`;
+}
+
 function buildQuery(params: Record<string, string | number | null | undefined>) {
   const search = new URLSearchParams();
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined && value !== null && value !== "") search.set(key, String(value));
   });
   return search.toString();
+}
+
+function shiftDate(dateStr: string, days: number) {
+  if (!dateStr) return "";
+  const date = new Date(`${dateStr}T00:00:00`);
+  if (Number.isNaN(date.getTime())) return "";
+  date.setDate(date.getDate() + days);
+  return date.toISOString().slice(0, 10);
 }
 
 function normalizeDailyResponse(json: any): DailyRow[] {
@@ -544,6 +513,10 @@ export default function KamisPriceDashboard() {
   const [newPresetName, setNewPresetName] = useState("");
   const [popup, setPopup] = useState({ open: false, title: "", description: "" });
   const [mapPriceData, setMapPriceData] = useState<MapPriceRow[]>(MAP_MOCK);
+  const [dailyRows, setDailyRows] = useState<DailyRow[]>(DAILY_MOCK);
+  const [previousYearDailyRows, setPreviousYearDailyRows] = useState<DailyRow[]>([]);
+  const [monthlyRows, setMonthlyRows] = useState<MonthlyRow[]>(MONTHLY_MOCK);
+  const [previousYearMonthlyRows, setPreviousYearMonthlyRows] = useState<MonthlyRow[]>([]);
 
   const DASHBOARD_PASSWORD = "kims6801!";
 
@@ -568,9 +541,6 @@ export default function KamisPriceDashboard() {
     gradeRank: "1",
     convertKgYn: "N",
   });
-
-  const [dailyRows, setDailyRows] = useState<DailyRow[]>(DAILY_MOCK);
-  const [monthlyRows, setMonthlyRows] = useState<MonthlyRow[]>(MONTHLY_MOCK);
 
   const allPresets = useMemo(() => [...BUILTIN_PRESETS, ...userPresets], [userPresets]);
 
@@ -677,6 +647,37 @@ export default function KamisPriceDashboard() {
       latest: prices[prices.length - 1],
     };
   }, [monthlyRows]);
+
+  const dailyComparisonRows = useMemo<DailyCompareRow[]>(() => {
+    const priorMap = new Map(previousYearDailyRows.map((row) => [row.regday, row.price]));
+    return dailyRows.map((row) => {
+      const compareDate = shiftDate(row.regday, -364);
+      const priorPrice = compareDate && priorMap.has(compareDate) ? priorMap.get(compareDate) ?? null : null;
+      const changeRate =
+        priorPrice && priorPrice > 0 ? ((row.price - priorPrice) / priorPrice) * 100 : null;
+      return {
+        ...row,
+        compareDate,
+        priorPrice,
+        changeRate,
+      };
+    });
+  }, [dailyRows, previousYearDailyRows]);
+
+  const monthlyComparisonRows = useMemo<MonthlyCompareRow[]>(() => {
+    const priorMap = new Map(previousYearMonthlyRows.map((row) => [row.month, row.price]));
+    return monthlyRows.map((row) => {
+      const priorPrice = priorMap.has(row.month) ? priorMap.get(row.month) ?? null : null;
+      const changeRate =
+        priorPrice && priorPrice > 0 ? ((row.price - priorPrice) / priorPrice) * 100 : null;
+      return {
+        ...row,
+        priorYear: String(Number(row.yyyy || monthlyForm.yyyy || "0") - 1),
+        priorPrice,
+        changeRate,
+      };
+    });
+  }, [monthlyRows, previousYearMonthlyRows, monthlyForm.yyyy]);
 
   function openPopup(title: string, description: string) {
     setPopup({ open: true, title, description });
@@ -894,19 +895,26 @@ export default function KamisPriceDashboard() {
 
     try {
       if (useMock) {
-        setDailyRows(
-          DAILY_MOCK.map((row) => ({
-            ...row,
-            itemname: selectedProductInfo?.itemname || row.itemname,
-            kindname: selectedProductInfo?.kindname || row.kindname,
-          }))
-        );
-        setStatusMessage("일별 조회 버튼이 정상 작동했습니다. 현재는 Mock 모드라 예시 일별 데이터를 다시 불러왔습니다.");
+        const currentRows = DAILY_MOCK.map((row) => ({
+          ...row,
+          itemname: selectedProductInfo?.itemname || row.itemname,
+          kindname: selectedProductInfo?.kindname || row.kindname,
+        }));
+        const priorRows = currentRows.map((row) => ({
+          ...row,
+          regday: shiftDate(row.regday, -364),
+          price: Math.round(row.price * 0.93),
+          yyyy: String(Number(row.yyyy) - 1),
+        }));
+
+        setDailyRows(currentRows);
+        setPreviousYearDailyRows(priorRows);
+        setStatusMessage("일별 조회 버튼이 정상 작동했습니다. 현재는 Mock 모드라 예시 일별/전년 동요일 데이터를 다시 불러왔습니다.");
         await loadRegionalLatestPrices();
         return;
       }
 
-      const query = buildQuery({
+      const currentQuery = buildQuery({
         action: "periodWholesaleProductList",
         p_cert_key: certKey,
         p_cert_id: certId,
@@ -921,19 +929,45 @@ export default function KamisPriceDashboard() {
         p_convert_kg_yn: dailyForm.convertKgYn,
       });
 
-      const response = await fetch(`/api/kamis?${query}`);
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const priorStart = shiftDate(dailyForm.startDay, -364);
+      const priorEnd = shiftDate(dailyForm.endDay, -364);
 
-      const json = await response.json();
-      const normalized = normalizeDailyResponse(json);
+      const priorQuery = buildQuery({
+        action: "periodWholesaleProductList",
+        p_cert_key: certKey,
+        p_cert_id: certId,
+        p_returntype: "json",
+        p_startday: priorStart,
+        p_endday: priorEnd,
+        p_countrycode: dailyForm.countryCode,
+        p_itemcategorycode: dailyForm.itemCategoryCode,
+        p_itemcode: dailyForm.itemCode,
+        p_kindcode: dailyForm.kindCode,
+        p_productrankcode: dailyForm.productRankCode,
+        p_convert_kg_yn: dailyForm.convertKgYn,
+      });
 
-      if (!normalized.length) {
+      const [currentResponse, priorResponse] = await Promise.all([
+        fetch(`/api/kamis?${currentQuery}`),
+        fetch(`/api/kamis?${priorQuery}`),
+      ]);
+
+      if (!currentResponse.ok) throw new Error(`HTTP ${currentResponse.status}`);
+
+      const currentJson = await currentResponse.json();
+      const currentNormalized = normalizeDailyResponse(currentJson);
+
+      const priorJson = priorResponse.ok ? await priorResponse.json() : null;
+      const priorNormalized = priorJson ? normalizeDailyResponse(priorJson) : [];
+
+      if (!currentNormalized.length) {
         openPopup("조회 결과 없음", "일별 시세 조회 결과가 없습니다. 조건을 다시 선택해주세요.");
         return;
       }
 
-      setDailyRows(normalized);
-      setStatusMessage(`일별 도매 시세 ${normalized.length}건을 불러왔습니다.`);
+      setDailyRows(currentNormalized);
+      setPreviousYearDailyRows(priorNormalized);
+      setStatusMessage(`일별 도매 시세 ${currentNormalized.length}건과 전년 동요일 비교 데이터를 불러왔습니다.`);
       await loadRegionalLatestPrices();
     } catch (e) {
       const message =
@@ -954,11 +988,18 @@ export default function KamisPriceDashboard() {
     try {
       if (useMock) {
         setMonthlyRows(MONTHLY_MOCK);
-        setStatusMessage("월별 조회 버튼이 정상 작동했습니다. 현재는 Mock 모드라 예시 월별 데이터를 다시 불러왔습니다.");
+        setPreviousYearMonthlyRows(
+          MONTHLY_MOCK.map((row) => ({
+            ...row,
+            price: Math.round(row.price * 0.95),
+            yyyy: String(Number(row.yyyy) - 1),
+          }))
+        );
+        setStatusMessage("월별 조회 버튼이 정상 작동했습니다. 현재는 Mock 모드라 예시 월별/전년 동월 데이터를 다시 불러왔습니다.");
         return;
       }
 
-      const query = buildQuery({
+      const currentQuery = buildQuery({
         action: "monthlySalesList",
         p_cert_key: certKey,
         p_cert_id: certId,
@@ -973,19 +1014,43 @@ export default function KamisPriceDashboard() {
         p_convert_kg_yn: monthlyForm.convertKgYn,
       });
 
-      const response = await fetch(`/api/kamis?${query}`);
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const previousYear = String(Number(monthlyForm.yyyy || "0") - 1);
+      const priorQuery = buildQuery({
+        action: "monthlySalesList",
+        p_cert_key: certKey,
+        p_cert_id: certId,
+        p_returntype: "json",
+        p_yyyy: previousYear,
+        p_period: monthlyForm.period,
+        p_countycode: monthlyForm.countyCode,
+        p_itemcategorycode: monthlyForm.itemCategoryCode,
+        p_itemcode: monthlyForm.itemCode,
+        p_kindcode: monthlyForm.kindCode,
+        p_graderank: monthlyForm.gradeRank,
+        p_convert_kg_yn: monthlyForm.convertKgYn,
+      });
 
-      const json = await response.json();
-      const normalized = normalizeMonthlyResponse(json);
+      const [currentResponse, priorResponse] = await Promise.all([
+        fetch(`/api/kamis?${currentQuery}`),
+        fetch(`/api/kamis?${priorQuery}`),
+      ]);
 
-      if (!normalized.length) {
+      if (!currentResponse.ok) throw new Error(`HTTP ${currentResponse.status}`);
+
+      const currentJson = await currentResponse.json();
+      const currentNormalized = normalizeMonthlyResponse(currentJson);
+
+      const priorJson = priorResponse.ok ? await priorResponse.json() : null;
+      const priorNormalized = priorJson ? normalizeMonthlyResponse(priorJson) : [];
+
+      if (!currentNormalized.length) {
         openPopup("조회 결과 없음", "월별 시세 조회 결과가 없습니다. 조건을 다시 선택해주세요.");
         return;
       }
 
-      setMonthlyRows(normalized);
-      setStatusMessage(`월별 시세 ${normalized.length}건을 불러왔습니다.`);
+      setMonthlyRows(currentNormalized);
+      setPreviousYearMonthlyRows(priorNormalized);
+      setStatusMessage(`월별 시세 ${currentNormalized.length}건과 전년 동월 비교 데이터를 불러왔습니다.`);
     } catch (e) {
       const message =
         e instanceof Error
@@ -1071,8 +1136,16 @@ export default function KamisPriceDashboard() {
 
   const activeChartData =
     mode === "daily"
-      ? dailyRows.map((row) => ({ label: row.regday.slice(5), price: row.price }))
-      : monthlyRows.map((row) => ({ label: row.month, price: row.price }));
+      ? dailyComparisonRows.map((row) => ({
+          label: row.regday.slice(5),
+          price: row.price,
+          priorPrice: row.priorPrice ?? undefined,
+        }))
+      : monthlyComparisonRows.map((row) => ({
+          label: row.month,
+          price: row.price,
+          priorPrice: row.priorPrice ?? undefined,
+        }));
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
@@ -1093,7 +1166,7 @@ export default function KamisPriceDashboard() {
                 KAMIS API 통합 가격 대시보드
               </h1>
               <p className="mt-2 text-sm text-slate-600">
-                농산물 · 축산물 · 수산물 전체 품목 드롭다운 조회 · 일별/월별 조회 · 차트 · 지역 가격 지도
+                농산물 · 축산물 · 수산물 전체 품목 드롭다운 조회 · 전년 동월/동요일 비교 · 등락률까지 포함
               </p>
             </div>
 
@@ -1472,7 +1545,7 @@ export default function KamisPriceDashboard() {
                 <div className="border-b border-slate-200 p-6">
                   <h3 className="text-xl font-bold">가격 추이 차트</h3>
                   <p className="mt-2 text-sm text-slate-600">
-                    {selectedProductLabel || "선택 품목"} · {mode === "daily" ? "일별 추이" : "월별 추이"}
+                    {selectedProductLabel || "선택 품목"} · {mode === "daily" ? "현재년도 vs 전년 동요일" : "현재년도 vs 전년 동월"}
                   </p>
                 </div>
 
@@ -1482,8 +1555,14 @@ export default function KamisPriceDashboard() {
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="label" />
                       <YAxis />
-                      <Tooltip formatter={(value) => formatWon(value)} />
-                      <Line type="monotone" dataKey="price" strokeWidth={3} dot />
+                      <Tooltip
+                        formatter={(value, name) => [
+                          value ? formatWon(value) : "",
+                          name === "price" ? "현재년도" : mode === "daily" ? "전년 동요일" : "전년 동월",
+                        ]}
+                      />
+                      <Line type="monotone" dataKey="price" stroke="#2563eb" strokeWidth={3} dot />
+                      <Line type="monotone" dataKey="priorPrice" stroke="#f97316" strokeWidth={3} dot connectNulls={false} />
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
@@ -1503,10 +1582,13 @@ export default function KamisPriceDashboard() {
                           <th className="px-3 py-2">품목</th>
                           <th className="px-3 py-2">지역</th>
                           <th className="px-3 py-2">가격</th>
+                          <th className="px-3 py-2">전년 동요일</th>
+                          <th className="px-3 py-2">전년 가격</th>
+                          <th className="px-3 py-2">등락률</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {dailyRows.map((row, index) => (
+                        {dailyComparisonRows.map((row, index) => (
                           <tr key={`${row.regday}-${index}`} className="border-b border-slate-100">
                             <td className="px-3 py-2">{row.regday}</td>
                             <td className="px-3 py-2">
@@ -1514,6 +1596,11 @@ export default function KamisPriceDashboard() {
                             </td>
                             <td className="px-3 py-2">{row.countyname || row.marketname || "-"}</td>
                             <td className="px-3 py-2 font-semibold">{formatWon(row.price)}</td>
+                            <td className="px-3 py-2">{row.priorPrice === null ? "" : row.compareDate}</td>
+                            <td className="px-3 py-2">{row.priorPrice === null ? "" : formatWon(row.priorPrice)}</td>
+                            <td className={`px-3 py-2 font-semibold ${row.changeRate !== null && row.changeRate > 0 ? "text-rose-600" : row.changeRate !== null && row.changeRate < 0 ? "text-blue-600" : ""}`}>
+                              {formatRate(row.changeRate)}
+                            </td>
                           </tr>
                         ))}
                       </tbody>
@@ -1524,13 +1611,21 @@ export default function KamisPriceDashboard() {
                         <tr className="border-b border-slate-200 text-left text-slate-500">
                           <th className="px-3 py-2">월</th>
                           <th className="px-3 py-2">가격</th>
+                          <th className="px-3 py-2">전년</th>
+                          <th className="px-3 py-2">전년 동월 가격</th>
+                          <th className="px-3 py-2">등락률</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {monthlyRows.map((row, index) => (
+                        {monthlyComparisonRows.map((row, index) => (
                           <tr key={`${row.month}-${index}`} className="border-b border-slate-100">
                             <td className="px-3 py-2">{row.month}</td>
                             <td className="px-3 py-2 font-semibold">{formatWon(row.price)}</td>
+                            <td className="px-3 py-2">{row.priorPrice === null ? "" : row.priorYear}</td>
+                            <td className="px-3 py-2">{row.priorPrice === null ? "" : formatWon(row.priorPrice)}</td>
+                            <td className={`px-3 py-2 font-semibold ${row.changeRate !== null && row.changeRate > 0 ? "text-rose-600" : row.changeRate !== null && row.changeRate < 0 ? "text-blue-600" : ""}`}>
+                              {formatRate(row.changeRate)}
+                            </td>
                           </tr>
                         ))}
                       </tbody>
@@ -1547,5 +1642,3 @@ export default function KamisPriceDashboard() {
     </div>
   );
 }
-
-
