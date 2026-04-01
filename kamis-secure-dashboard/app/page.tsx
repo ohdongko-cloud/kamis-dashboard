@@ -1,4 +1,6 @@
-"use client";
+===== app/page.tsx =====
+
+'use client';
 
 import React, { useEffect, useMemo, useState } from "react";
 import {
@@ -14,6 +16,7 @@ import {
   CheckCircle2,
   Save,
   MapPinned,
+  RefreshCw,
 } from "lucide-react";
 import {
   LineChart,
@@ -101,68 +104,32 @@ const MONTHLY_GRADE_OPTIONS = [
 
 const BUILTIN_PRESETS = [
   {
-    label: "쌀 · 일반계(중품)",
-    itemCategoryCode: "100",
-    itemCode: "111",
-    kindCode: "01",
-    productRankCode: "04",
-    gradeRank: "2",
-    source: "기본",
-  },
-  {
-    label: "배추 · 상품",
-    itemCategoryCode: "200",
-    itemCode: "211",
-    kindCode: "00",
+    label: "오징어 · 기본",
+    itemCategoryCode: "600",
+    itemCode: "",
+    kindCode: "",
     productRankCode: "01",
     gradeRank: "1",
     source: "기본",
   },
   {
-    label: "무 · 상품",
-    itemCategoryCode: "200",
-    itemCode: "231",
-    kindCode: "00",
+    label: "고등어 · 기본",
+    itemCategoryCode: "600",
+    itemCode: "",
+    kindCode: "",
     productRankCode: "01",
     gradeRank: "1",
     source: "기본",
   },
-];
-
-const DAILY_MOCK = [
-  { regday: "2026-03-24", price: 4620, itemname: "쌀", kindname: "일반계", countyname: "서울" },
-  { regday: "2026-03-25", price: 4680, itemname: "쌀", kindname: "일반계", countyname: "서울" },
-  { regday: "2026-03-26", price: 4710, itemname: "쌀", kindname: "일반계", countyname: "서울" },
-  { regday: "2026-03-27", price: 4690, itemname: "쌀", kindname: "일반계", countyname: "서울" },
-  { regday: "2026-03-28", price: 4740, itemname: "쌀", kindname: "일반계", countyname: "서울" },
-  { regday: "2026-03-29", price: 4760, itemname: "쌀", kindname: "일반계", countyname: "서울" },
-  { regday: "2026-03-30", price: 4780, itemname: "쌀", kindname: "일반계", countyname: "서울" },
-];
-
-const MONTHLY_MOCK = [
-  { month: "1월", price: 4350 },
-  { month: "2월", price: 4420 },
-  { month: "3월", price: 4510 },
-  { month: "4월", price: 4470 },
-  { month: "5월", price: 4590 },
-  { month: "6월", price: 4630 },
-  { month: "7월", price: 4570 },
-  { month: "8월", price: 4650 },
-  { month: "9월", price: 4700 },
-  { month: "10월", price: 4730 },
-  { month: "11월", price: 4680 },
-  { month: "12월", price: 4760 },
-];
-
-const MAP_MOCK = [
-  { region: "서울", latestPrice: 14600, latestDate: "2026-03-30" },
-  { region: "부산", latestPrice: 13200, latestDate: "2026-03-30" },
-  { region: "경기", latestPrice: 12800, latestDate: "2026-03-30" },
-  { region: "강원", latestPrice: 13700, latestDate: "2026-03-30" },
-  { region: "충남", latestPrice: 12500, latestDate: "2026-03-30" },
-  { region: "전남", latestPrice: 11800, latestDate: "2026-03-30" },
-  { region: "경남", latestPrice: 12100, latestDate: "2026-03-30" },
-  { region: "제주", latestPrice: 15400, latestDate: "2026-03-30" },
+  {
+    label: "갈치 · 기본",
+    itemCategoryCode: "600",
+    itemCode: "",
+    kindCode: "",
+    productRankCode: "01",
+    gradeRank: "1",
+    source: "기본",
+  },
 ];
 
 type ProductInfoRow = {
@@ -184,27 +151,141 @@ type PresetRow = {
   source: string;
 };
 
-function cleanNumber(value: unknown) {
-  if (value === null || value === undefined) return null;
+type DailyRow = {
+  regday: string;
+  price: number;
+  itemname: string;
+  kindname: string;
+  countyname: string;
+  marketname: string;
+  yyyy: string;
+};
+
+type MonthlyRow = {
+  month: string;
+  price: number;
+  yyyy: string;
+  caption: string;
+};
+
+type MapPriceRow = {
+  region: string;
+  latestPrice: number;
+  latestDate: string;
+};
+
+const DAILY_MOCK: DailyRow[] = [
+  {
+    regday: "2026-03-24",
+    price: 4620,
+    itemname: "오징어",
+    kindname: "냉동",
+    countyname: "서울",
+    marketname: "가락시장",
+    yyyy: "2026",
+  },
+  {
+    regday: "2026-03-25",
+    price: 4680,
+    itemname: "오징어",
+    kindname: "냉동",
+    countyname: "서울",
+    marketname: "가락시장",
+    yyyy: "2026",
+  },
+  {
+    regday: "2026-03-26",
+    price: 4710,
+    itemname: "오징어",
+    kindname: "냉동",
+    countyname: "서울",
+    marketname: "가락시장",
+    yyyy: "2026",
+  },
+  {
+    regday: "2026-03-27",
+    price: 4690,
+    itemname: "오징어",
+    kindname: "냉동",
+    countyname: "서울",
+    marketname: "가락시장",
+    yyyy: "2026",
+  },
+  {
+    regday: "2026-03-28",
+    price: 4740,
+    itemname: "오징어",
+    kindname: "냉동",
+    countyname: "서울",
+    marketname: "가락시장",
+    yyyy: "2026",
+  },
+  {
+    regday: "2026-03-29",
+    price: 4760,
+    itemname: "오징어",
+    kindname: "냉동",
+    countyname: "서울",
+    marketname: "가락시장",
+    yyyy: "2026",
+  },
+  {
+    regday: "2026-03-30",
+    price: 4780,
+    itemname: "오징어",
+    kindname: "냉동",
+    countyname: "서울",
+    marketname: "가락시장",
+    yyyy: "2026",
+  },
+];
+
+const MONTHLY_MOCK: MonthlyRow[] = [
+  { month: "1월", price: 4350, yyyy: "2026", caption: "" },
+  { month: "2월", price: 4420, yyyy: "2026", caption: "" },
+  { month: "3월", price: 4510, yyyy: "2026", caption: "" },
+  { month: "4월", price: 4470, yyyy: "2026", caption: "" },
+  { month: "5월", price: 4590, yyyy: "2026", caption: "" },
+  { month: "6월", price: 4630, yyyy: "2026", caption: "" },
+  { month: "7월", price: 4570, yyyy: "2026", caption: "" },
+  { month: "8월", price: 4650, yyyy: "2026", caption: "" },
+  { month: "9월", price: 4700, yyyy: "2026", caption: "" },
+  { month: "10월", price: 4730, yyyy: "2026", caption: "" },
+  { month: "11월", price: 4680, yyyy: "2026", caption: "" },
+  { month: "12월", price: 4760, yyyy: "2026", caption: "" },
+];
+
+const MAP_MOCK: MapPriceRow[] = [
+  { region: "서울", latestPrice: 14600, latestDate: "2026-03-30" },
+  { region: "부산", latestPrice: 13200, latestDate: "2026-03-30" },
+  { region: "경기", latestPrice: 12800, latestDate: "2026-03-30" },
+  { region: "강원", latestPrice: 13700, latestDate: "2026-03-30" },
+  { region: "충남", latestPrice: 12500, latestDate: "2026-03-30" },
+  { region: "전남", latestPrice: 11800, latestDate: "2026-03-30" },
+  { region: "경남", latestPrice: 12100, latestDate: "2026-03-30" },
+  { region: "제주", latestPrice: 15400, latestDate: "2026-03-30" },
+];
+
+function cleanNumber(value: unknown): number {
+  if (value === null || value === undefined) return 0;
   const n = Number(String(value).replace(/,/g, "").trim());
-  return Number.isFinite(n) ? n : null;
+  return Number.isFinite(n) ? n : 0;
 }
 
 function formatWon(value: unknown) {
   const n = cleanNumber(value);
-  if (n === null) return "-";
   return `${n.toLocaleString("ko-KR")}원`;
 }
 
 function buildQuery(params: Record<string, string | number | null | undefined>) {
   const search = new URLSearchParams();
   Object.entries(params).forEach(([key, value]) => {
-    if (value !== undefined && value !== null) search.set(key, String(value));
+    if (value !== undefined && value !== null && value !== "") search.set(key, String(value));
   });
   return search.toString();
 }
 
-function normalizeDailyResponse(json: any) {
+function normalizeDailyResponse(json: any): DailyRow[] {
   const root = json?.data ?? json?.price ?? json;
   const items = root?.item ?? root ?? [];
   const arr = Array.isArray(items) ? items : [items];
@@ -212,33 +293,32 @@ function normalizeDailyResponse(json: any) {
   return arr
     .filter(Boolean)
     .map((row: any) => ({
-      regday: row.regday ?? row.date ?? "",
-      price: cleanNumber(row.price),
-      itemname: row.itemname ?? "",
-      kindname: row.kindname ?? "",
-      countyname: row.countyname ?? row.marketname ?? "",
-      marketname: row.marketname ?? "",
-      yyyy: row.yyyy ?? "",
+      regday: String(row?.regday ?? row?.date ?? ""),
+      price: cleanNumber(row?.price),
+      itemname: String(row?.itemname ?? ""),
+      kindname: String(row?.kindname ?? ""),
+      countyname: String(row?.countyname ?? row?.marketname ?? ""),
+      marketname: String(row?.marketname ?? ""),
+      yyyy: String(row?.yyyy ?? ""),
     }))
-    .filter((row) => row.regday || row.price !== null);
+    .filter((row) => Boolean(row.regday));
 }
 
-function normalizeMonthlyResponse(json: any) {
+function normalizeMonthlyResponse(json: any): MonthlyRow[] {
   const root = json?.price ?? json?.data ?? json;
   const items = root?.item ?? root ?? [];
   const arr = Array.isArray(items) ? items : [items];
 
   return arr.flatMap((row: any) => {
-    const months = Array.from({ length: 12 }, (_, i) => {
+    return Array.from({ length: 12 }, (_, i) => {
       const idx = i + 1;
       return {
         month: `${idx}월`,
-        price: cleanNumber(row[`m${idx}`]),
-        yyyy: row.yyyy ?? "",
-        caption: row.caption ?? "",
+        price: cleanNumber(row?.[`m${idx}`]),
+        yyyy: String(row?.yyyy ?? ""),
+        caption: String(row?.caption ?? ""),
       };
     });
-    return months.filter((m) => m.price !== null);
   });
 }
 
@@ -250,17 +330,16 @@ function normalizeProductInfoResponse(json: any): ProductInfoRow[] {
   return arr
     .filter(Boolean)
     .map((row: any) => ({
-      itemcategorycode: row.itemcategorycode ?? "",
-      itemcategoryname: row.itemcategoryname ?? CATEGORY_LABELS[row.itemcategorycode] ?? "",
-      itemcode: row.itemcode ?? "",
-      itemname: row.itemname ?? "",
-      kindcode: row.kindcode ?? "",
-      kindname: row.kindname ?? "",
-    }));
-}
-
-function getRegionLabel(value: string) {
-  return REGION_OPTIONS.find((r) => r.value === value)?.label ?? "전체지역";
+      itemcategorycode: String(row?.itemcategorycode ?? ""),
+      itemcategoryname: String(
+        row?.itemcategoryname ?? CATEGORY_LABELS[String(row?.itemcategorycode ?? "")] ?? ""
+      ),
+      itemcode: String(row?.itemcode ?? ""),
+      itemname: String(row?.itemname ?? ""),
+      kindcode: String(row?.kindcode ?? ""),
+      kindname: String(row?.kindname ?? ""),
+    }))
+    .filter((row) => Boolean(row.itemcode));
 }
 
 function getRegionKeyFromName(name: string) {
@@ -364,10 +443,10 @@ function KoreaPriceMap({
   data,
   productLabel,
 }: {
-  data: { region: string; latestPrice: number; latestDate: string }[];
+  data: MapPriceRow[];
   productLabel: string;
 }) {
-  const prices = data.map((d) => d.latestPrice).filter((v) => v !== null && v !== undefined);
+  const prices = data.map((d) => d.latestPrice).filter((v) => v > 0);
   const min = prices.length ? Math.min(...prices) : 0;
   const max = prices.length ? Math.max(...prices) : 0;
 
@@ -466,7 +545,7 @@ export default function KamisPriceDashboard() {
   const [userPresets, setUserPresets] = useState<PresetRow[]>([]);
   const [newPresetName, setNewPresetName] = useState("");
   const [popup, setPopup] = useState({ open: false, title: "", description: "" });
-  const [mapPriceData, setMapPriceData] = useState(MAP_MOCK);
+  const [mapPriceData, setMapPriceData] = useState<MapPriceRow[]>(MAP_MOCK);
 
   const DASHBOARD_PASSWORD = "kims6801!";
 
@@ -474,10 +553,10 @@ export default function KamisPriceDashboard() {
     startDay: "2026-03-24",
     endDay: "2026-03-30",
     countryCode: "1101",
-    itemCategoryCode: "100",
-    itemCode: "111",
-    kindCode: "01",
-    productRankCode: "04",
+    itemCategoryCode: "600",
+    itemCode: "",
+    kindCode: "",
+    productRankCode: "01",
     convertKgYn: "Y",
   });
 
@@ -485,15 +564,15 @@ export default function KamisPriceDashboard() {
     yyyy: "2026",
     period: "3",
     countyCode: "1101",
-    itemCategoryCode: "100",
-    itemCode: "111",
-    kindCode: "01",
-    gradeRank: "2",
+    itemCategoryCode: "600",
+    itemCode: "",
+    kindCode: "",
+    gradeRank: "1",
     convertKgYn: "N",
   });
 
-  const [dailyRows, setDailyRows] = useState(DAILY_MOCK);
-  const [monthlyRows, setMonthlyRows] = useState(MONTHLY_MOCK);
+  const [dailyRows, setDailyRows] = useState<DailyRow[]>(DAILY_MOCK);
+  const [monthlyRows, setMonthlyRows] = useState<MonthlyRow[]>(MONTHLY_MOCK);
 
   const allPresets = useMemo(() => [...BUILTIN_PRESETS, ...userPresets], [userPresets]);
 
@@ -521,7 +600,8 @@ export default function KamisPriceDashboard() {
         });
       }
     });
-    return Array.from(map.values()).sort((a, b) => a.value.localeCompare(b.value));
+    const values = Array.from(map.values()).sort((a, b) => a.value.localeCompare(b.value));
+    return values.length ? values : [{ value: "600", label: "600 · 수산물" }];
   }, [productOptions]);
 
   const itemOptions = useMemo(() => {
@@ -551,7 +631,7 @@ export default function KamisPriceDashboard() {
         if (!map.has(item.kindcode)) {
           map.set(item.kindcode, {
             value: item.kindcode,
-            label: `${item.kindcode} · ${item.kindname || "기본품종"}`,
+            label: `${item.kindcode || "00"} · ${item.kindname || "기본품종"}`,
           });
         }
       });
@@ -559,7 +639,7 @@ export default function KamisPriceDashboard() {
   }, [productOptions, dailyForm.itemCategoryCode, dailyForm.itemCode]);
 
   const dailySummary = useMemo(() => {
-    const prices = dailyRows.map((d) => d.price).filter((v) => v !== null) as number[];
+    const prices = dailyRows.map((d) => d.price).filter((v) => v > 0);
     if (!prices.length) return null;
     return {
       min: Math.min(...prices),
@@ -570,7 +650,7 @@ export default function KamisPriceDashboard() {
   }, [dailyRows]);
 
   const monthlySummary = useMemo(() => {
-    const prices = monthlyRows.map((d) => d.price).filter((v) => v !== null) as number[];
+    const prices = monthlyRows.map((d) => d.price).filter((v) => v > 0);
     if (!prices.length) return null;
     return {
       min: Math.min(...prices),
@@ -661,6 +741,53 @@ export default function KamisPriceDashboard() {
     setError("");
 
     try {
+      if (useMock) {
+        const mockProducts: ProductInfoRow[] = [
+          {
+            itemcategorycode: "600",
+            itemcategoryname: "수산물",
+            itemcode: "611",
+            itemname: "오징어",
+            kindcode: "01",
+            kindname: "냉동",
+          },
+          {
+            itemcategorycode: "600",
+            itemcategoryname: "수산물",
+            itemcode: "612",
+            itemname: "고등어",
+            kindcode: "01",
+            kindname: "국산",
+          },
+          {
+            itemcategorycode: "600",
+            itemcategoryname: "수산물",
+            itemcode: "613",
+            itemname: "갈치",
+            kindcode: "01",
+            kindname: "국산",
+          },
+          {
+            itemcategorycode: "600",
+            itemcategoryname: "수산물",
+            itemcode: "614",
+            itemname: "명태",
+            kindcode: "01",
+            kindname: "냉동",
+          },
+        ];
+        const keyword = productKeyword.trim().toLowerCase();
+        const filtered = mockProducts.filter((item) =>
+          `${item.itemcategoryname} ${item.itemname} ${item.kindname}`.toLowerCase().includes(keyword)
+        );
+        setProductOptions(filtered);
+        if (filtered[0]) {
+          syncFormsFromSelection(filtered[0].itemcategorycode, filtered[0].itemcode, filtered[0].kindcode);
+        }
+        setStatusMessage(`Mock 품목 코드표에서 ${filtered.length}건을 찾았습니다.`);
+        return;
+      }
+
       const query = buildQuery({
         action: "productInfo",
         p_cert_key: certKey,
@@ -734,22 +861,26 @@ export default function KamisPriceDashboard() {
           if (!response.ok) return null;
 
           const json = await response.json();
-          const rows = normalizeDailyResponse(json).filter((row) => row.price !== null);
+          const rows = normalizeDailyResponse(json).filter((row) => row.price > 0);
           if (!rows.length) return null;
 
           const latest = rows[rows.length - 1];
           return {
             region: getRegionKeyFromName(region.label),
-            latestPrice: latest.price as number,
+            latestPrice: latest.price,
             latestDate: latest.regday,
           };
         })
       );
 
-      const filtered = results.filter(Boolean) as { region: string; latestPrice: number; latestDate: string }[];
-      if (filtered.length) setMapPriceData(filtered);
+      const filtered = results.filter(Boolean) as MapPriceRow[];
+      if (filtered.length) {
+        setMapPriceData(filtered);
+      } else {
+        setMapPriceData(MAP_MOCK);
+      }
     } catch {
-      // ignore
+      setMapPriceData(MAP_MOCK);
     } finally {
       setLoadingMap(false);
     }
@@ -763,7 +894,6 @@ export default function KamisPriceDashboard() {
       if (useMock) {
         setDailyRows(DAILY_MOCK);
         setStatusMessage("일별 조회 버튼이 정상 작동했습니다. 현재는 Mock 모드라 예시 일별 데이터를 다시 불러왔습니다.");
-        openPopup("Mock 데이터 안내", "현재 Mock 모드가 켜져 있어서 실제 KAMIS가 아니라 예시 일별 데이터를 보여주고 있습니다.");
         await loadRegionalLatestPrices();
         return;
       }
@@ -817,7 +947,6 @@ export default function KamisPriceDashboard() {
       if (useMock) {
         setMonthlyRows(MONTHLY_MOCK);
         setStatusMessage("월별 조회 버튼이 정상 작동했습니다. 현재는 Mock 모드라 예시 월별 데이터를 다시 불러왔습니다.");
-        openPopup("Mock 데이터 안내", "현재 Mock 모드가 켜져 있어서 실제 KAMIS가 아니라 예시 월별 데이터를 보여주고 있습니다.");
         return;
       }
 
@@ -843,7 +972,7 @@ export default function KamisPriceDashboard() {
       const normalized = normalizeMonthlyResponse(json);
 
       if (!normalized.length) {
-        openPopup("조회 결과 없음", "월별 시세 조회 결과가 없습니다. 품목이나 등급 조건을 다른 값으로 선택해보세요.");
+        openPopup("조회 결과 없음", "월별 시세 조회 결과가 없습니다. 조건을 다시 선택해주세요.");
         return;
       }
 
@@ -862,706 +991,591 @@ export default function KamisPriceDashboard() {
   }
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    try {
+      if (typeof window === "undefined") return;
+      const savedKey = localStorage.getItem(STORAGE_KEYS.certKey) ?? "";
+      const savedId = localStorage.getItem(STORAGE_KEYS.certId) ?? "";
+      const savedUseMock = localStorage.getItem(STORAGE_KEYS.useMock);
+      const savedPresets = localStorage.getItem(STORAGE_KEYS.presets);
 
-    const savedKey = localStorage.getItem(STORAGE_KEYS.certKey) || "";
-    const savedId = localStorage.getItem(STORAGE_KEYS.certId) || "";
-    const savedUseMock = localStorage.getItem(STORAGE_KEYS.useMock);
-    const savedPresets = localStorage.getItem(STORAGE_KEYS.presets);
-
-    if (savedKey) setCertKey(savedKey);
-    if (savedId) setCertId(savedId);
-    if (savedUseMock !== null) setUseMock(JSON.parse(savedUseMock));
-    if (savedPresets) {
-      try {
-        setUserPresets(JSON.parse(savedPresets));
-      } catch {}
+      setCertKey(savedKey);
+      setCertId(savedId);
+      setUseMock(savedUseMock ? JSON.parse(savedUseMock) : true);
+      setUserPresets(savedPresets ? JSON.parse(savedPresets) : []);
+    } catch {
+      // ignore
     }
   }, []);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    localStorage.setItem(STORAGE_KEYS.presets, JSON.stringify(userPresets));
+    try {
+      if (typeof window === "undefined") return;
+      localStorage.setItem(STORAGE_KEYS.presets, JSON.stringify(userPresets));
+    } catch {
+      // ignore
+    }
   }, [userPresets]);
 
   useEffect(() => {
-    if (isUnlocked && productOptions.length === 0 && certKey && certId) {
-      searchProducts();
+    searchProducts();
+  }, []);
+
+  useEffect(() => {
+    if (itemOptions.length > 0 && !itemOptions.some((i) => i.value === dailyForm.itemCode)) {
+      const first = itemOptions[0];
+      setDailyForm((prev) => ({ ...prev, itemCode: first.value }));
+      setMonthlyForm((prev) => ({ ...prev, itemCode: first.value }));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isUnlocked]);
+  }, [itemOptions, dailyForm.itemCode]);
 
-  if (!isUnlocked) {
-    return (
-      <div className="min-h-screen bg-slate-50 p-6 md:p-10">
-        <div className="mx-auto flex min-h-[80vh] max-w-md items-center justify-center">
-          <div className={cardStyle() + " w-full p-6"}>
-            <h2 className="text-2xl font-bold">KAMIS 대시보드 접근</h2>
-            <p className="mt-2 text-sm text-slate-600">비밀번호를 입력해야 대시보드를 확인할 수 있습니다.</p>
+  useEffect(() => {
+    if (kindOptions.length > 0 && !kindOptions.some((k) => k.value === dailyForm.kindCode)) {
+      const first = kindOptions[0];
+      setDailyForm((prev) => ({ ...prev, kindCode: first.value }));
+      setMonthlyForm((prev) => ({ ...prev, kindCode: first.value }));
+    }
+  }, [kindOptions, dailyForm.kindCode]);
 
-            <div className="mt-4">
-              <label className={labelStyle()}>비밀번호</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") handleUnlock();
-                }}
-                placeholder="비밀번호 입력"
-                className={inputStyle()}
-              />
-            </div>
-
-            {passwordError ? (
-              <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                {passwordError}
-              </div>
-            ) : null}
-
-            <div className="mt-4">
-              <button className={primaryButtonStyle(false) + " w-full"} onClick={handleUnlock}>
-                대시보드 열기
-              </button>
-            </div>
-
-            <div className="mt-4 text-xs text-slate-500">
-              참고: 이 방식은 화면 접근용 간단 잠금으로, 민감한 정보를 보호하는 정식 보안 인증 수단은 아닙니다.
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const activeChartData =
+    mode === "daily"
+      ? dailyRows.map((row) => ({ label: row.regday.slice(5), price: row.price }))
+      : monthlyRows.map((row) => ({ label: row.month, price: row.price }));
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6 md:p-10">
+    <div className="min-h-screen bg-slate-50 text-slate-900">
       <PopupModal
         open={popup.open}
         title={popup.title}
         description={popup.description}
-        onClose={() => setPopup((prev) => ({ ...prev, open: false }))}
+        onClose={() => setPopup({ open: false, title: "", description: "" })}
       />
 
-      <div className="mx-auto max-w-7xl space-y-6">
-        <div className="rounded-2xl border border-blue-200 bg-blue-50 px-5 py-4 text-sm font-semibold text-blue-900">
-          {VERSION_LABEL}
-        </div>
-
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm font-medium text-amber-900">
-          본 페이지는 보안이 확보되지 않았으니 내부 정보를 업로드하거나 가공하지 말고 대시보드 내용만 확인해주세요
-        </div>
-
-        <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-          <div className="space-y-4">
-            <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-sm shadow-sm">
-              <Database className="h-4 w-4" />
-              KAMIS 오픈 API 도매 시세 대시보드
-            </div>
+      <div className="mx-auto max-w-7xl p-4 md:p-8">
+        <div className="mb-6 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <h1 className="text-3xl font-semibold tracking-tight">일별 · 월별 도매 시세 조회 페이지</h1>
+              <div className="text-xs font-semibold tracking-wide text-slate-500">{VERSION_LABEL}</div>
+              <h1 className="mt-2 flex items-center gap-2 text-3xl font-bold tracking-tight">
+                <Fish className="h-7 w-7" />
+                KAMIS API 수산물 가격 대시보드
+              </h1>
               <p className="mt-2 text-sm text-slate-600">
-                인증키 저장, 자주쓰는 품목 프리셋 저장, 지역별 최신 가격 지도까지 넣은 버전입니다.
-              </p>
-            </div>
-          </div>
-
-          <div className={cardStyle()}>
-            <div className="border-b border-slate-200 p-6">
-              <h2 className="flex items-center gap-2 text-lg font-bold">
-                <KeyRound className="h-5 w-5" />
-                API 연결 설정
-              </h2>
-              <p className="mt-2 text-sm text-slate-600">
-                한 번 저장한 인증 정보는 이 브라우저에 남아 다음 접속 때 자동으로 채워집니다.
+                드롭다운 기반 품목 선택 · 일별/월별 조회 · 차트 · 지역 가격 지도까지 한 번에 보는 최종 버전
               </p>
             </div>
 
-            <div className="grid gap-4 p-6 md:grid-cols-2">
-              <div className="md:col-span-2">
-                <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-                  <div>
-                    <div className="font-medium">Mock 데이터 사용</div>
-                    <div className="text-xs text-slate-500">켜져 있으면 인증값 없이도 미리보기 가능</div>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={useMock}
-                    onChange={(e) => {
-                      const checked = e.target.checked;
-                      setUseMock(checked);
-                      setStatusMessage(checked ? "Mock 모드가 켜졌습니다." : "실제 KAMIS API 모드로 전환했습니다.");
-                    }}
-                    className="h-6 w-6"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className={labelStyle()}>p_cert_key</label>
-                <input
-                  value={certKey}
-                  onChange={(e) => setCertKey(e.target.value)}
-                  placeholder="발급받은 인증Key"
-                  className={inputStyle()}
-                />
-              </div>
-
-              <div>
-                <label className={labelStyle()}>p_cert_id</label>
-                <input
-                  value={certId}
-                  onChange={(e) => setCertId(e.target.value)}
-                  placeholder="발급받은 요청자ID"
-                  className={inputStyle()}
-                />
-              </div>
-
-              <div className="md:col-span-2">
-                <button className={secondaryButtonStyle() + " w-full"} onClick={saveCredentials}>
-                  <Save className="mr-2 h-4 w-4" />
-                  인증 정보 이 브라우저에 저장
-                </button>
-              </div>
-
-              <div className="md:col-span-2">
-                <label className={labelStyle()}>빠른 품목 선택</label>
-                <select className={inputStyle()} defaultValue="" onChange={(e) => e.target.value && applyPreset(e.target.value)}>
-                  <option value="" disabled>
-                    자주 쓰는 품목 프리셋 선택
-                  </option>
-                  {allPresets.map((preset) => (
-                    <option key={`${preset.source}-${preset.label}`} value={preset.label}>
-                      {`${preset.label}${preset.source === "내 저장" ? " · 내 저장" : ""}`}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="md:col-span-2">
-                <label className={labelStyle()}>현재 선택을 자주쓰는 프리셋으로 저장</label>
-                <div className="flex gap-2">
-                  <input
-                    value={newPresetName}
-                    onChange={(e) => setNewPresetName(e.target.value)}
-                    placeholder="예: 오징어 · 서울 · 상품"
-                    className={inputStyle()}
-                  />
-                  <button className={primaryButtonStyle(false)} onClick={saveCurrentPreset}>
-                    <Save className="mr-2 h-4 w-4" />
-                    저장
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className={cardStyle()}>
-          <div className="border-b border-slate-200 p-6">
-            <h2 className="flex items-center gap-2 text-lg font-bold">
-              <Fish className="h-5 w-5" />
-              품목 코드 찾기
-            </h2>
-            <p className="mt-2 text-sm text-slate-600">
-              수산, 오징어, 고등어, 김, 굴, 전복처럼 한글 키워드로 찾고, 드롭다운으로 바로 고릅니다.
-            </p>
-          </div>
-
-          <div className="space-y-4 p-6">
-            <div className="grid gap-4 md:grid-cols-[1fr_auto]">
-              <input
-                value={productKeyword}
-                onChange={(e) => setProductKeyword(e.target.value)}
-                placeholder="예: 수산, 오징어, 고등어, 김, 굴, 전복"
-                className={inputStyle()}
-              />
-              <button className={primaryButtonStyle(loadingProducts)} onClick={searchProducts} disabled={loadingProducts}>
-                {loadingProducts ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Search className="mr-2 h-4 w-4" />}
-                코드 찾기
+            <div className="flex flex-wrap gap-3">
+              <button
+                className={mode === "daily" ? primaryButtonStyle(false) : secondaryButtonStyle()}
+                onClick={() => setMode("daily")}
+              >
+                <CalendarDays className="mr-2 h-4 w-4" />
+                일별
+              </button>
+              <button
+                className={mode === "monthly" ? primaryButtonStyle(false) : secondaryButtonStyle()}
+                onClick={() => setMode("monthly")}
+              >
+                <BarChart3 className="mr-2 h-4 w-4" />
+                월별
+              </button>
+              <button
+                className={useMock ? secondaryButtonStyle() : primaryButtonStyle(false)}
+                onClick={() => setUseMock((prev) => !prev)}
+              >
+                <Database className="mr-2 h-4 w-4" />
+                {useMock ? "Mock ON" : "실데이터 ON"}
               </button>
             </div>
-
-            <div className="grid gap-4 lg:grid-cols-3">
-              <div>
-                <label className={labelStyle()}>부류 선택</label>
-                <select
-                  className={inputStyle()}
-                  value={dailyForm.itemCategoryCode}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    const nextItems = productOptions.filter((item) => item.itemcategorycode === value);
-                    const firstItem = nextItems[0];
-                    if (!firstItem) return;
-                    syncFormsFromSelection(value, firstItem.itemcode, firstItem.kindcode);
-                  }}
-                >
-                  {categoryOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className={labelStyle()}>품목 선택</label>
-                <select
-                  className={inputStyle()}
-                  value={dailyForm.itemCode}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    const nextKinds = productOptions.filter(
-                      (item) => item.itemcategorycode === dailyForm.itemCategoryCode && item.itemcode === value
-                    );
-                    const firstKind = nextKinds[0];
-                    if (!firstKind) return;
-                    syncFormsFromSelection(dailyForm.itemCategoryCode, value, firstKind.kindcode);
-                  }}
-                >
-                  {itemOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className={labelStyle()}>품종 선택</label>
-                <select
-                  className={inputStyle()}
-                  value={dailyForm.kindCode}
-                  onChange={(e) => syncFormsFromSelection(dailyForm.itemCategoryCode, dailyForm.itemCode, e.target.value)}
-                >
-                  {kindOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div className="grid gap-3 md:grid-cols-2">
-              <CodeHint
-                label="선택된 부류"
-                value={`${dailyForm.itemCategoryCode} · ${CATEGORY_LABELS[dailyForm.itemCategoryCode] ?? selectedProductInfo?.itemcategoryname ?? "미확인"}`}
-              />
-              <CodeHint
-                label="선택된 품목"
-                value={`${dailyForm.itemCode} · ${selectedProductInfo?.itemname || "미확인"}`}
-              />
-              <CodeHint
-                label="선택된 품종"
-                value={`${dailyForm.kindCode} · ${selectedProductInfo?.kindname || "기본품종"}`}
-              />
-              <CodeHint
-                label="선택된 지역"
-                value={`${dailyForm.countryCode || "전체"} · ${getRegionLabel(dailyForm.countryCode)}`}
-              />
-            </div>
           </div>
         </div>
 
-        {statusMessage ? (
-          <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm text-emerald-900">
-            <div className="flex items-start gap-2">
-              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />
-              <div>
-                <div className="font-semibold">상태 안내</div>
-                <div className="mt-1">{statusMessage}</div>
+        {!isUnlocked ? (
+          <div className="mx-auto max-w-xl">
+            <div className={cardStyle()}>
+              <div className="border-b border-slate-200 p-6">
+                <h2 className="flex items-center gap-2 text-xl font-bold">
+                  <KeyRound className="h-5 w-5" />
+                  대시보드 잠금 해제
+                </h2>
+                <p className="mt-2 text-sm text-slate-600">접속 비밀번호를 입력하면 전체 기능이 열립니다.</p>
+              </div>
+              <div className="space-y-4 p-6">
+                <div>
+                  <label className={labelStyle()}>비밀번호</label>
+                  <input
+                    type="password"
+                    className={inputStyle()}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="비밀번호 입력"
+                  />
+                </div>
+                {passwordError ? (
+                  <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                    {passwordError}
+                  </div>
+                ) : null}
+                <button className={primaryButtonStyle(false)} onClick={handleUnlock}>
+                  접속하기
+                </button>
               </div>
             </div>
           </div>
-        ) : null}
-
-        {error ? (
-          <div className="rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-900">
-            <div className="flex items-start gap-2">
-              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-              <div>
-                <div className="font-semibold">연결 안내</div>
-                <div className="mt-1">{error}</div>
-              </div>
-            </div>
-          </div>
-        ) : null}
-
-        <div className="space-y-6">
-          <div className="grid w-full grid-cols-2 gap-3 rounded-3xl bg-white p-2 shadow-sm">
-            <button
-              className={`rounded-2xl px-4 py-3 font-semibold ${mode === "daily" ? "bg-slate-950 text-white" : "bg-white text-slate-900 border border-slate-200"}`}
-              onClick={() => setMode("daily")}
-            >
-              <span className="inline-flex items-center gap-2">
-                <CalendarDays className="h-4 w-4" />
-                일별 도매 시세
-              </span>
-            </button>
-            <button
-              className={`rounded-2xl px-4 py-3 font-semibold ${mode === "monthly" ? "bg-slate-950 text-white" : "bg-white text-slate-900 border border-slate-200"}`}
-              onClick={() => setMode("monthly")}
-            >
-              <span className="inline-flex items-center gap-2">
-                <BarChart3 className="h-4 w-4" />
-                월별 시세 흐름
-              </span>
-            </button>
-          </div>
-
-          {mode === "daily" ? (
-            <div className="grid gap-6 lg:grid-cols-[380px_1fr]">
+        ) : (
+          <div className="space-y-6">
+            <div className="grid gap-6 xl:grid-cols-[1.1fr_1.9fr]">
               <div className={cardStyle()}>
                 <div className="border-b border-slate-200 p-6">
-                  <h3 className="text-xl font-bold">일별 조회 조건</h3>
-                  <p className="mt-2 text-sm text-slate-600">드롭다운 선택 방식</p>
+                  <h2 className="flex items-center gap-2 text-xl font-bold">
+                    <KeyRound className="h-5 w-5" />
+                    API / 조회 설정
+                  </h2>
                 </div>
 
-                <div className="space-y-4 p-6">
-                  <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-5 p-6">
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div>
+                      <label className={labelStyle()}>KAMIS Cert Key</label>
+                      <input
+                        className={inputStyle()}
+                        value={certKey}
+                        onChange={(e) => setCertKey(e.target.value)}
+                        placeholder="실데이터 사용 시 입력"
+                      />
+                    </div>
+                    <div>
+                      <label className={labelStyle()}>KAMIS Cert ID</label>
+                      <input
+                        className={inputStyle()}
+                        value={certId}
+                        onChange={(e) => setCertId(e.target.value)}
+                        placeholder="실데이터 사용 시 입력"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-3">
+                    <button className={secondaryButtonStyle()} onClick={saveCredentials}>
+                      <Save className="mr-2 h-4 w-4" />
+                      인증값 저장
+                    </button>
+                    <button className={secondaryButtonStyle()} onClick={searchProducts} disabled={loadingProducts}>
+                      {loadingProducts ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        <RefreshCw className="mr-2 h-4 w-4" />
+                      )}
+                      품목 코드 새로 조회
+                    </button>
+                  </div>
+
+                  <div>
+                    <label className={labelStyle()}>품목 검색 키워드</label>
+                    <div className="flex gap-3">
+                      <input
+                        className={inputStyle()}
+                        value={productKeyword}
+                        onChange={(e) => setProductKeyword(e.target.value)}
+                        placeholder="예: 수산, 오징어, 갈치"
+                      />
+                      <button className={primaryButtonStyle(false)} onClick={searchProducts} disabled={loadingProducts}>
+                        <Search className="mr-2 h-4 w-4" />
+                        검색
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-4 md:grid-cols-3">
+                    <div>
+                      <label className={labelStyle()}>부류코드</label>
+                      <select
+                        className={inputStyle()}
+                        value={dailyForm.itemCategoryCode}
+                        onChange={(e) => syncFormsFromSelection(e.target.value, "", "")}
+                      >
+                        {categoryOptions.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className={labelStyle()}>품목코드</label>
+                      <select
+                        className={inputStyle()}
+                        value={dailyForm.itemCode}
+                        onChange={(e) => syncFormsFromSelection(dailyForm.itemCategoryCode, e.target.value, "")}
+                      >
+                        <option value="">선택</option>
+                        {itemOptions.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className={labelStyle()}>품종코드</label>
+                      <select
+                        className={inputStyle()}
+                        value={dailyForm.kindCode}
+                        onChange={(e) => syncFormsFromSelection(dailyForm.itemCategoryCode, dailyForm.itemCode, e.target.value)}
+                      >
+                        <option value="">선택</option>
+                        {kindOptions.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <CodeHint label="선택 품목" value={selectedProductLabel || "-"} />
+                    <CodeHint label="데이터 모드" value={useMock ? "Mock 데이터" : "실제 KAMIS API"} />
+                  </div>
+
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div>
+                      <label className={labelStyle()}>프리셋 불러오기</label>
+                      <select className={inputStyle()} defaultValue="" onChange={(e) => applyPreset(e.target.value)}>
+                        <option value="">선택</option>
+                        {allPresets.map((preset) => (
+                          <option key={`${preset.source}-${preset.label}`} value={preset.label}>
+                            {preset.label} ({preset.source})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className={labelStyle()}>현재 조건 저장 이름</label>
+                      <div className="flex gap-3">
+                        <input
+                          className={inputStyle()}
+                          value={newPresetName}
+                          onChange={(e) => setNewPresetName(e.target.value)}
+                          placeholder="예: 냉동오징어 서울"
+                        />
+                        <button className={secondaryButtonStyle()} onClick={saveCurrentPreset}>
+                          저장
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className={cardStyle()}>
+                <div className="border-b border-slate-200 p-6">
+                  <h2 className="flex items-center gap-2 text-xl font-bold">
+                    <Info className="h-5 w-5" />
+                    조회 조건
+                  </h2>
+                </div>
+
+                <div className="space-y-6 p-6">
+                  <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                     <div>
                       <label className={labelStyle()}>시작일</label>
                       <input
                         type="date"
-                        value={dailyForm.startDay}
-                        onChange={(e) => setDailyForm({ ...dailyForm, startDay: e.target.value })}
                         className={inputStyle()}
+                        value={dailyForm.startDay}
+                        onChange={(e) => setDailyForm((prev) => ({ ...prev, startDay: e.target.value }))}
                       />
                     </div>
                     <div>
                       <label className={labelStyle()}>종료일</label>
                       <input
                         type="date"
-                        value={dailyForm.endDay}
-                        onChange={(e) => setDailyForm({ ...dailyForm, endDay: e.target.value })}
                         className={inputStyle()}
+                        value={dailyForm.endDay}
+                        onChange={(e) => setDailyForm((prev) => ({ ...prev, endDay: e.target.value }))}
                       />
                     </div>
-                  </div>
-
-                  <div>
-                    <label className={labelStyle()}>지역코드</label>
-                    <select
-                      className={inputStyle()}
-                      value={dailyForm.countryCode}
-                      onChange={(e) => setDailyForm({ ...dailyForm, countryCode: e.target.value })}
-                    >
-                      {REGION_OPTIONS.map((r) => (
-                        <option key={r.label + r.value} value={r.value}>
-                          {r.label || "전체지역"}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className={labelStyle()}>등급코드 선택</label>
-                    <select
-                      className={inputStyle()}
-                      value={dailyForm.productRankCode}
-                      onChange={(e) => setDailyForm({ ...dailyForm, productRankCode: e.target.value })}
-                    >
-                      {WHOLESALE_RANK_OPTIONS.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="grid gap-3">
-                    <CodeHint
-                      label="부류코드 한글"
-                      value={CATEGORY_LABELS[dailyForm.itemCategoryCode] ?? selectedProductInfo?.itemcategoryname ?? "미확인"}
-                    />
-                    <CodeHint label="품목코드 한글" value={selectedProductInfo?.itemname || "미확인"} />
-                    <CodeHint label="품종코드 한글" value={selectedProductInfo?.kindname || "기본품종"} />
-                    <CodeHint
-                      label="등급코드 한글"
-                      value={WHOLESALE_RANK_OPTIONS.find((o) => o.value === dailyForm.productRankCode)?.label || "미확인"}
-                    />
-                  </div>
-
-                  <div>
-                    <label className={labelStyle()}>kg 환산 여부</label>
-                    <select
-                      className={inputStyle()}
-                      value={dailyForm.convertKgYn}
-                      onChange={(e) => setDailyForm({ ...dailyForm, convertKgYn: e.target.value })}
-                    >
-                      <option value="Y">Y</option>
-                      <option value="N">N</option>
-                    </select>
-                  </div>
-
-                  <button className={primaryButtonStyle(loading) + " w-full"} onClick={loadDaily} disabled={loading}>
-                    {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Search className="mr-2 h-4 w-4" />}
-                    일별 시세 조회
-                  </button>
-                </div>
-              </div>
-
-              <div className="space-y-6">
-                <div className="grid gap-4 md:grid-cols-4">
-                  <StatCard title="최신가" value={dailySummary ? formatWon(dailySummary.latest) : "-"} />
-                  <StatCard title="평균가" value={dailySummary ? formatWon(dailySummary.avg) : "-"} />
-                  <StatCard title="최저가" value={dailySummary ? formatWon(dailySummary.min) : "-"} />
-                  <StatCard title="최고가" value={dailySummary ? formatWon(dailySummary.max) : "-"} />
-                </div>
-
-                <div className={cardStyle()}>
-                  <div className="border-b border-slate-200 p-6">
-                    <h3 className="text-xl font-bold">일별 가격 추이</h3>
-                    <p className="mt-2 text-sm text-slate-600">조회 기간 내 도매가격 흐름</p>
-                  </div>
-                  <div className="p-6">
-                    <div className="h-[320px] w-full">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={dailyRows}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="regday" />
-                          <YAxis />
-                          <Tooltip formatter={(v) => formatWon(v)} />
-                          <Line type="monotone" dataKey="price" strokeWidth={2} dot={false} />
-                        </LineChart>
-                      </ResponsiveContainer>
+                    <div>
+                      <label className={labelStyle()}>지역</label>
+                      <select
+                        className={inputStyle()}
+                        value={dailyForm.countryCode}
+                        onChange={(e) => {
+                          setDailyForm((prev) => ({ ...prev, countryCode: e.target.value }));
+                          setMonthlyForm((prev) => ({ ...prev, countyCode: e.target.value }));
+                        }}
+                      >
+                        {REGION_OPTIONS.map((option) => (
+                          <option key={option.value || "all"} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className={labelStyle()}>등급</label>
+                      <select
+                        className={inputStyle()}
+                        value={dailyForm.productRankCode}
+                        onChange={(e) => setDailyForm((prev) => ({ ...prev, productRankCode: e.target.value }))}
+                      >
+                        {WHOLESALE_RANK_OPTIONS.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                   </div>
-                </div>
 
-                <div className={cardStyle()}>
-                  <div className="border-b border-slate-200 p-6">
-                    <h3 className="text-xl font-bold">일별 데이터 테이블</h3>
-                    <p className="mt-2 text-sm text-slate-600">실무 확인용</p>
-                  </div>
-                  <div className="overflow-x-auto p-6">
-                    <table className="w-full border-collapse">
-                      <thead>
-                        <tr className="border-b border-slate-200 text-left text-sm text-slate-500">
-                          <th className="px-3 py-3">날짜</th>
-                          <th className="px-3 py-3">품목</th>
-                          <th className="px-3 py-3">품종</th>
-                          <th className="px-3 py-3">지역</th>
-                          <th className="px-3 py-3 text-right">가격</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {dailyRows.map((row, idx) => (
-                          <tr key={`${row.regday}-${idx}`} className="border-b border-slate-100 text-sm">
-                            <td className="px-3 py-3">{row.regday}</td>
-                            <td className="px-3 py-3">{row.itemname || "-"}</td>
-                            <td className="px-3 py-3">{row.kindname || "-"}</td>
-                            <td className="px-3 py-3">{row.countyname || row.marketname || "-"}</td>
-                            <td className="px-3 py-3 text-right font-medium">{formatWon(row.price)}</td>
-                          </tr>
+                  <div className="grid gap-4 md:grid-cols-3">
+                    <div>
+                      <label className={labelStyle()}>월별 연도</label>
+                      <input
+                        className={inputStyle()}
+                        value={monthlyForm.yyyy}
+                        onChange={(e) => setMonthlyForm((prev) => ({ ...prev, yyyy: e.target.value }))}
+                      />
+                    </div>
+                    <div>
+                      <label className={labelStyle()}>월별 기간 타입</label>
+                      <select
+                        className={inputStyle()}
+                        value={monthlyForm.period}
+                        onChange={(e) => setMonthlyForm((prev) => ({ ...prev, period: e.target.value }))}
+                      >
+                        <option value="1">1 · 소매</option>
+                        <option value="2">2 · 도매</option>
+                        <option value="3">3 · 도매시장</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className={labelStyle()}>월별 등급</label>
+                      <select
+                        className={inputStyle()}
+                        value={monthlyForm.gradeRank}
+                        onChange={(e) => setMonthlyForm((prev) => ({ ...prev, gradeRank: e.target.value }))}
+                      >
+                        {MONTHLY_GRADE_OPTIONS.map((option) => (
+                          <option key={`${option.value}-${option.label}`} value={option.value}>
+                            {option.label}
+                          </option>
                         ))}
-                      </tbody>
-                    </table>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-3">
+                    <button className={primaryButtonStyle(loading)} onClick={loadDaily} disabled={loading}>
+                      {loading && mode === "daily" ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        <CalendarDays className="mr-2 h-4 w-4" />
+                      )}
+                      일별 조회
+                    </button>
+                    <button className={primaryButtonStyle(loading)} onClick={loadMonthly} disabled={loading}>
+                      {loading && mode === "monthly" ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        <BarChart3 className="mr-2 h-4 w-4" />
+                      )}
+                      월별 조회
+                    </button>
+                    <button className={secondaryButtonStyle()} onClick={loadRegionalLatestPrices} disabled={loadingMap}>
+                      {loadingMap ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        <MapPinned className="mr-2 h-4 w-4" />
+                      )}
+                      지도 갱신
+                    </button>
+                  </div>
+
+                  <div
+                    className={`rounded-2xl border px-4 py-3 text-sm ${
+                      error
+                        ? "border-rose-200 bg-rose-50 text-rose-700"
+                        : "border-emerald-200 bg-emerald-50 text-emerald-700"
+                    }`}
+                  >
+                    <div className="flex items-start gap-2">
+                      {error ? <AlertCircle className="mt-0.5 h-4 w-4" /> : <CheckCircle2 className="mt-0.5 h-4 w-4" />}
+                      <span>{error || statusMessage}</span>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          ) : (
-            <div className="grid gap-6 lg:grid-cols-[380px_1fr]">
+
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              <StatCard
+                title={mode === "daily" ? "최신 일별 가격" : "최신 월별 가격"}
+                value={formatWon(mode === "daily" ? dailySummary?.latest ?? 0 : monthlySummary?.latest ?? 0)}
+              />
+              <StatCard
+                title={mode === "daily" ? "평균 일별 가격" : "평균 월별 가격"}
+                value={formatWon(mode === "daily" ? dailySummary?.avg ?? 0 : monthlySummary?.avg ?? 0)}
+              />
+              <StatCard
+                title={mode === "daily" ? "최저 가격" : "최저 월별 가격"}
+                value={formatWon(mode === "daily" ? dailySummary?.min ?? 0 : monthlySummary?.min ?? 0)}
+              />
+              <StatCard
+                title={mode === "daily" ? "최고 가격" : "최고 월별 가격"}
+                value={formatWon(mode === "daily" ? dailySummary?.max ?? 0 : monthlySummary?.max ?? 0)}
+              />
+            </div>
+
+            <div className="grid gap-6 xl:grid-cols-[1.5fr_1fr]">
               <div className={cardStyle()}>
                 <div className="border-b border-slate-200 p-6">
-                  <h3 className="text-xl font-bold">월별 조회 조건</h3>
-                  <p className="mt-2 text-sm text-slate-600">드롭다운 선택 방식</p>
+                  <h3 className="text-xl font-bold">가격 추이 차트</h3>
+                  <p className="mt-2 text-sm text-slate-600">
+                    {selectedProductLabel || "선택 품목"} · {mode === "daily" ? "일별 추이" : "월별 추이"}
+                  </p>
                 </div>
 
-                <div className="space-y-4 p-6">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className={labelStyle()}>기준연도</label>
-                      <input
-                        value={monthlyForm.yyyy}
-                        onChange={(e) => setMonthlyForm({ ...monthlyForm, yyyy: e.target.value })}
-                        className={inputStyle()}
-                      />
-                    </div>
-                    <div>
-                      <label className={labelStyle()}>조회기간(년)</label>
-                      <input
-                        value={monthlyForm.period}
-                        onChange={(e) => setMonthlyForm({ ...monthlyForm, period: e.target.value })}
-                        className={inputStyle()}
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className={labelStyle()}>지역코드</label>
-                    <select
-                      className={inputStyle()}
-                      value={monthlyForm.countyCode}
-                      onChange={(e) => setMonthlyForm({ ...monthlyForm, countyCode: e.target.value })}
-                    >
-                      {REGION_OPTIONS.map((r) => (
-                        <option key={r.label + r.value + "m"} value={r.value}>
-                          {r.label || "전체지역"}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className={labelStyle()}>등급값 선택</label>
-                    <select
-                      className={inputStyle()}
-                      value={monthlyForm.gradeRank}
-                      onChange={(e) => setMonthlyForm({ ...monthlyForm, gradeRank: e.target.value })}
-                    >
-                      {MONTHLY_GRADE_OPTIONS.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="grid gap-3">
-                    <CodeHint
-                      label="부류코드 한글"
-                      value={CATEGORY_LABELS[monthlyForm.itemCategoryCode] ?? selectedProductInfo?.itemcategoryname ?? "미확인"}
-                    />
-                    <CodeHint label="품목코드 한글" value={selectedProductInfo?.itemname || "미확인"} />
-                    <CodeHint label="품종코드 한글" value={selectedProductInfo?.kindname || "기본품종"} />
-                    <CodeHint
-                      label="등급값 한글"
-                      value={MONTHLY_GRADE_OPTIONS.find((o) => o.value === monthlyForm.gradeRank)?.label || "미확인"}
-                    />
-                  </div>
-
-                  <div>
-                    <label className={labelStyle()}>kg 환산 여부</label>
-                    <select
-                      className={inputStyle()}
-                      value={monthlyForm.convertKgYn}
-                      onChange={(e) => setMonthlyForm({ ...monthlyForm, convertKgYn: e.target.value })}
-                    >
-                      <option value="Y">Y</option>
-                      <option value="N">N</option>
-                    </select>
-                  </div>
-
-                  <button className={primaryButtonStyle(loading) + " w-full"} onClick={loadMonthly} disabled={loading}>
-                    {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Search className="mr-2 h-4 w-4" />}
-                    월별 시세 조회
-                  </button>
+                <div className="h-[360px] p-4 md:p-6">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={activeChartData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="label" />
+                      <YAxis />
+                      <Tooltip formatter={(value) => formatWon(value)} />
+                      <Line type="monotone" dataKey="price" strokeWidth={3} dot />
+                    </LineChart>
+                  </ResponsiveContainer>
                 </div>
               </div>
 
-              <div className="space-y-6">
-                <div className="grid gap-4 md:grid-cols-4">
-                  <StatCard title="최근월 가격" value={monthlySummary ? formatWon(monthlySummary.latest) : "-"} />
-                  <StatCard title="월평균" value={monthlySummary ? formatWon(monthlySummary.avg) : "-"} />
-                  <StatCard title="최저월" value={monthlySummary ? formatWon(monthlySummary.min) : "-"} />
-                  <StatCard title="최고월" value={monthlySummary ? formatWon(monthlySummary.max) : "-"} />
+              <div className={cardStyle()}>
+                <div className="border-b border-slate-200 p-6">
+                  <h3 className="text-xl font-bold">상세 데이터</h3>
                 </div>
 
-                <div className={cardStyle()}>
-                  <div className="border-b border-slate-200 p-6">
-                    <h3 className="text-xl font-bold">월별 가격 흐름</h3>
-                    <p className="mt-2 text-sm text-slate-600">1월부터 12월까지 월간 평균 가격</p>
-                  </div>
-                  <div className="p-6">
-                    <div className="h-[320px] w-full">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={monthlyRows}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="month" />
-                          <YAxis />
-                          <Tooltip formatter={(v) => formatWon(v)} />
-                          <Line type="monotone" dataKey="price" strokeWidth={2} dot={false} />
-                        </LineChart>
-                      </ResponsiveContainer>
-                    </div>
-                  </div>
-                </div>
-
-                <div className={cardStyle()}>
-                  <div className="border-b border-slate-200 p-6">
-                    <h3 className="text-xl font-bold">월별 데이터 테이블</h3>
-                    <p className="mt-2 text-sm text-slate-600">월별 요약값 확인</p>
-                  </div>
-                  <div className="overflow-x-auto p-6">
-                    <table className="w-full border-collapse">
-                      <thead>
-                        <tr className="border-b border-slate-200 text-left text-sm text-slate-500">
-                          <th className="px-3 py-3">월</th>
-                          <th className="px-3 py-3 text-right">가격</th>
-                          <th className="px-3 py-3">상태</th>
+                <div className="max-h-[420px] overflow-auto p-4">
+                  {mode === "daily" ? (
+                    <table className="min-w-full text-sm">
+                      <thead className="sticky top-0 bg-white">
+                        <tr className="border-b border-slate-200 text-left text-slate-500">
+                          <th className="px-3 py-2">일자</th>
+                          <th className="px-3 py-2">품목</th>
+                          <th className="px-3 py-2">지역</th>
+                          <th className="px-3 py-2">가격</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {monthlyRows.map((row, idx) => (
-                          <tr key={`${row.month}-${idx}`} className="border-b border-slate-100 text-sm">
-                            <td className="px-3 py-3">{row.month}</td>
-                            <td className="px-3 py-3 text-right font-medium">{formatWon(row.price)}</td>
-                            <td className="px-3 py-3">
-                              <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
-                                정상
-                              </span>
+                        {dailyRows.map((row, index) => (
+                          <tr key={`${row.regday}-${index}`} className="border-b border-slate-100">
+                            <td className="px-3 py-2">{row.regday}</td>
+                            <td className="px-3 py-2">
+                              {row.itemname} {row.kindname ? `· ${row.kindname}` : ""}
                             </td>
+                            <td className="px-3 py-2">{row.countyname || row.marketname || "-"}</td>
+                            <td className="px-3 py-2 font-semibold">{formatWon(row.price)}</td>
                           </tr>
                         ))}
                       </tbody>
                     </table>
-                  </div>
+                  ) : (
+                    <table className="min-w-full text-sm">
+                      <thead className="sticky top-0 bg-white">
+                        <tr className="border-b border-slate-200 text-left text-slate-500">
+                          <th className="px-3 py-2">월</th>
+                          <th className="px-3 py-2">가격</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {monthlyRows.map((row, index) => (
+                          <tr key={`${row.month}-${index}`} className="border-b border-slate-100">
+                            <td className="px-3 py-2">{row.month}</td>
+                            <td className="px-3 py-2 font-semibold">{formatWon(row.price)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
                 </div>
               </div>
             </div>
-          )}
-        </div>
 
-        <KoreaPriceMap data={mapPriceData} productLabel={selectedProductLabel} />
-
-        {loadingMap ? (
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm text-slate-800">
-            <div className="flex items-start gap-2">
-              <Loader2 className="mt-0.5 h-4 w-4 animate-spin shrink-0" />
-              <div>
-                <div className="font-semibold">지도 로딩 중</div>
-                <div className="mt-1">선택한 품목 기준 지역별 최신 가격을 수집하고 있습니다.</div>
-              </div>
-            </div>
+            <KoreaPriceMap data={mapPriceData} productLabel={selectedProductLabel} />
           </div>
-        ) : null}
-
-        <div className={cardStyle()}>
-          <div className="border-b border-slate-200 p-6">
-            <h3 className="text-xl font-bold">코드 이해 가이드</h3>
-            <p className="mt-2 text-sm text-slate-600">KAMIS 코드 체계를 쉽게 보기 위한 설명입니다.</p>
-          </div>
-          <div className="space-y-3 p-6 text-sm text-slate-700">
-            <div className="flex items-start gap-2">
-              <Info className="mt-0.5 h-4 w-4 shrink-0" />
-              <span>
-                <b>부류코드</b>는 큰 카테고리입니다. 예: 채소류, 수산물.
-              </span>
-            </div>
-            <div className="flex items-start gap-2">
-              <Info className="mt-0.5 h-4 w-4 shrink-0" />
-              <span>
-                <b>품목코드</b>는 오징어, 고등어, 굴처럼 실제 품목입니다.
-              </span>
-            </div>
-            <div className="flex items-start gap-2">
-              <Info className="mt-0.5 h-4 w-4 shrink-0" />
-              <span>
-                <b>품종코드</b>는 같은 품목 안의 세부 구분입니다. 없으면 보통 기본품종입니다.
-              </span>
-            </div>
-            <div className="flex items-start gap-2">
-              <Info className="mt-0.5 h-4 w-4 shrink-0" />
-              <span>
-                <b>등급코드/등급값</b>은 상품·중품 같은 품질 구분입니다.
-              </span>
-            </div>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );
 }
+
+
+===== app/api/kamis/route.ts =====
+
+import { NextRequest, NextResponse } from "next/server";
+
+const KAMIS_BASE_URL = "https://www.kamis.or.kr/service/price/xml.do";
+
+export async function GET(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+
+    const upstream = new URL(KAMIS_BASE_URL);
+
+    searchParams.forEach((value, key) => {
+      if (value !== "") upstream.searchParams.set(key, value);
+    });
+
+    if (!upstream.searchParams.get("p_returntype")) {
+      upstream.searchParams.set("p_returntype", "json");
+    }
+
+    const response = await fetch(upstream.toString(), {
+      method: "GET",
+      cache: "no-store",
+      headers: {
+        Accept: "application/json, text/plain, */*",
+      },
+    });
+
+    const text = await response.text();
+
+    try {
+      const json = JSON.parse(text);
+      return NextResponse.json(json, { status: response.status });
+    } catch {
+      return NextResponse.json(
+        {
+          error: "KAMIS 응답을 JSON으로 파싱하지 못했습니다.",
+          status: response.status,
+          raw: text,
+          requestedUrl: upstream.toString(),
+        },
+        { status: 502 }
+      );
+    }
+  } catch (error) {
+    return NextResponse.json(
+      {
+        error: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 }
+    );
+  }
+}
+
+
+===== 참고 =====
+
+KAMIS 실제 API 예시
+- 현재 페이지는 브라우저 입력값(certKey, certId)을 그대로 /api/kamis로 전달하는 구조
+- 별도 .env 없이도 동작 가능
+- 실사용 시 브라우저 화면에서 cert key / id 입력 후 '인증값 저장' 사용
+
+필요 파일
+1) app/page.tsx
+2) app/api/kamis/route.ts
+
