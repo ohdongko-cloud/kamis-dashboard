@@ -797,10 +797,8 @@ export default function KamisPriceDashboard() {
 
           const response = await fetch(`/api/kamis?${query}`);
           if (!response.ok) return null;
-
+          
           const json = await response.json();
-          console.log("productInfo raw response:", json);
-          console.log("normalized product rows:", normalized.length, normalized.slice(0, 5));
           const rows = normalizeDailyResponse(json).filter((row) => row.price > 0);
           if (!rows.length) return null;
 
