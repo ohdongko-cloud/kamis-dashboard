@@ -157,6 +157,7 @@ type DailyRow = {
   countyname: string;
   marketname: string;
   yyyy: string;
+  unit: string;
 };
 
 type MonthlyRow = {
@@ -164,12 +165,14 @@ type MonthlyRow = {
   price: number;
   yyyy: string;
   caption: string;
+  unit: string;
 };
 
 type MapPriceRow = {
   region: string;
   latestPrice: number;
   latestDate: string;
+  unit: string;
 };
 
 type DailyCompareRow = DailyRow & {
@@ -185,39 +188,39 @@ type MonthlyCompareRow = MonthlyRow & {
 };
 
 const DAILY_MOCK: DailyRow[] = [
-  { regday: "2026-03-24", price: 4620, itemname: "오징어", kindname: "냉동", countyname: "서울", marketname: "가락시장", yyyy: "2026" },
-  { regday: "2026-03-25", price: 4680, itemname: "오징어", kindname: "냉동", countyname: "서울", marketname: "가락시장", yyyy: "2026" },
-  { regday: "2026-03-26", price: 4710, itemname: "오징어", kindname: "냉동", countyname: "서울", marketname: "가락시장", yyyy: "2026" },
-  { regday: "2026-03-27", price: 4690, itemname: "오징어", kindname: "냉동", countyname: "서울", marketname: "가락시장", yyyy: "2026" },
-  { regday: "2026-03-28", price: 4740, itemname: "오징어", kindname: "냉동", countyname: "서울", marketname: "가락시장", yyyy: "2026" },
-  { regday: "2026-03-29", price: 4760, itemname: "오징어", kindname: "냉동", countyname: "서울", marketname: "가락시장", yyyy: "2026" },
-  { regday: "2026-03-30", price: 4780, itemname: "오징어", kindname: "냉동", countyname: "서울", marketname: "가락시장", yyyy: "2026" },
+  { regday: "2026-03-24", price: 4620, itemname: "오징어", kindname: "냉동", countyname: "서울", marketname: "가락시장", yyyy: "2026", unit: "1마리" },
+  { regday: "2026-03-25", price: 4680, itemname: "오징어", kindname: "냉동", countyname: "서울", marketname: "가락시장", yyyy: "2026", unit: "1마리" },
+  { regday: "2026-03-26", price: 4710, itemname: "오징어", kindname: "냉동", countyname: "서울", marketname: "가락시장", yyyy: "2026", unit: "1마리" },
+  { regday: "2026-03-27", price: 4690, itemname: "오징어", kindname: "냉동", countyname: "서울", marketname: "가락시장", yyyy: "2026", unit: "1마리" },
+  { regday: "2026-03-28", price: 4740, itemname: "오징어", kindname: "냉동", countyname: "서울", marketname: "가락시장", yyyy: "2026", unit: "1마리" },
+  { regday: "2026-03-29", price: 4760, itemname: "오징어", kindname: "냉동", countyname: "서울", marketname: "가락시장", yyyy: "2026", unit: "1마리" },
+  { regday: "2026-03-30", price: 4780, itemname: "오징어", kindname: "냉동", countyname: "서울", marketname: "가락시장", yyyy: "2026", unit: "1마리" },
 ];
 
 const MONTHLY_MOCK: MonthlyRow[] = [
-  { month: "1월", price: 4350, yyyy: "2026", caption: "" },
-  { month: "2월", price: 4420, yyyy: "2026", caption: "" },
-  { month: "3월", price: 4510, yyyy: "2026", caption: "" },
-  { month: "4월", price: 4470, yyyy: "2026", caption: "" },
-  { month: "5월", price: 4590, yyyy: "2026", caption: "" },
-  { month: "6월", price: 4630, yyyy: "2026", caption: "" },
-  { month: "7월", price: 4570, yyyy: "2026", caption: "" },
-  { month: "8월", price: 4650, yyyy: "2026", caption: "" },
-  { month: "9월", price: 4700, yyyy: "2026", caption: "" },
-  { month: "10월", price: 4730, yyyy: "2026", caption: "" },
-  { month: "11월", price: 4680, yyyy: "2026", caption: "" },
-  { month: "12월", price: 4760, yyyy: "2026", caption: "" },
+  { month: "1월", price: 4350, yyyy: "2026", caption: "도매가격 ; 수산물 ; 오징어 ; 냉동 ; 1마리", unit: "1마리" },
+  { month: "2월", price: 4420, yyyy: "2026", caption: "도매가격 ; 수산물 ; 오징어 ; 냉동 ; 1마리", unit: "1마리" },
+  { month: "3월", price: 4510, yyyy: "2026", caption: "도매가격 ; 수산물 ; 오징어 ; 냉동 ; 1마리", unit: "1마리" },
+  { month: "4월", price: 4470, yyyy: "2026", caption: "도매가격 ; 수산물 ; 오징어 ; 냉동 ; 1마리", unit: "1마리" },
+  { month: "5월", price: 4590, yyyy: "2026", caption: "도매가격 ; 수산물 ; 오징어 ; 냉동 ; 1마리", unit: "1마리" },
+  { month: "6월", price: 4630, yyyy: "2026", caption: "도매가격 ; 수산물 ; 오징어 ; 냉동 ; 1마리", unit: "1마리" },
+  { month: "7월", price: 4570, yyyy: "2026", caption: "도매가격 ; 수산물 ; 오징어 ; 냉동 ; 1마리", unit: "1마리" },
+  { month: "8월", price: 4650, yyyy: "2026", caption: "도매가격 ; 수산물 ; 오징어 ; 냉동 ; 1마리", unit: "1마리" },
+  { month: "9월", price: 4700, yyyy: "2026", caption: "도매가격 ; 수산물 ; 오징어 ; 냉동 ; 1마리", unit: "1마리" },
+  { month: "10월", price: 4730, yyyy: "2026", caption: "도매가격 ; 수산물 ; 오징어 ; 냉동 ; 1마리", unit: "1마리" },
+  { month: "11월", price: 4680, yyyy: "2026", caption: "도매가격 ; 수산물 ; 오징어 ; 냉동 ; 1마리", unit: "1마리" },
+  { month: "12월", price: 4760, yyyy: "2026", caption: "도매가격 ; 수산물 ; 오징어 ; 냉동 ; 1마리", unit: "1마리" },
 ];
 
 const MAP_MOCK: MapPriceRow[] = [
-  { region: "서울", latestPrice: 14600, latestDate: "2026-03-30" },
-  { region: "부산", latestPrice: 13200, latestDate: "2026-03-30" },
-  { region: "경기", latestPrice: 12800, latestDate: "2026-03-30" },
-  { region: "강원", latestPrice: 13700, latestDate: "2026-03-30" },
-  { region: "충남", latestPrice: 12500, latestDate: "2026-03-30" },
-  { region: "전남", latestPrice: 11800, latestDate: "2026-03-30" },
-  { region: "경남", latestPrice: 12100, latestDate: "2026-03-30" },
-  { region: "제주", latestPrice: 15400, latestDate: "2026-03-30" },
+  { region: "서울", latestPrice: 14600, latestDate: "2026-03-30", unit: "1마리" },
+  { region: "부산", latestPrice: 13200, latestDate: "2026-03-30", unit: "1마리" },
+  { region: "경기", latestPrice: 12800, latestDate: "2026-03-30", unit: "1마리" },
+  { region: "강원", latestPrice: 13700, latestDate: "2026-03-30", unit: "1마리" },
+  { region: "충남", latestPrice: 12500, latestDate: "2026-03-30", unit: "1마리" },
+  { region: "전남", latestPrice: 11800, latestDate: "2026-03-30", unit: "1마리" },
+  { region: "경남", latestPrice: 12100, latestDate: "2026-03-30", unit: "1마리" },
+  { region: "제주", latestPrice: 15400, latestDate: "2026-03-30", unit: "1마리" },
 ];
 
 function cleanNumber(value: unknown): number {
@@ -226,9 +229,29 @@ function cleanNumber(value: unknown): number {
   return Number.isFinite(n) ? n : 0;
 }
 
-function formatWon(value: unknown) {
+function normalizeUnit(value: unknown) {
+  return String(value ?? "")
+    .replace(/\s+/g, " ")
+    .replace(/^단위\s*[:：]?\s*/i, "")
+    .trim();
+}
+
+function extractUnitFromCaption(caption: unknown) {
+  const raw = String(caption ?? "").trim();
+  if (!raw) return "";
+
+  const segments = raw
+    .split(";")
+    .map((part) => normalizeUnit(part))
+    .filter(Boolean);
+
+  return segments.length ? segments[segments.length - 1] : "";
+}
+
+function formatWon(value: unknown, unit?: string) {
   const n = cleanNumber(value);
-  return `${n.toLocaleString("ko-KR")}원`;
+  const normalizedUnit = normalizeUnit(unit);
+  return `${n.toLocaleString("ko-KR")}원${normalizedUnit ? ` / ${normalizedUnit}` : ""}`;
 }
 
 function formatRate(value: number | null) {
@@ -267,6 +290,7 @@ function normalizeDailyResponse(json: any): DailyRow[] {
       countyname: String(row?.countyname ?? row?.marketname ?? ""),
       marketname: String(row?.marketname ?? ""),
       yyyy: String(row?.yyyy ?? ""),
+      unit: normalizeUnit(row?.unit ?? row?.unitname ?? row?.danwi ?? row?.danwiname ?? row?.qtyunit ?? row?.qtyunitname ?? row?.unit_qty ?? row?.itemunit ?? row?.itemunitname ?? ""),
     }))
     .filter((row) => Boolean(row.regday));
 }
@@ -279,11 +303,13 @@ function normalizeMonthlyResponse(json: any): MonthlyRow[] {
   return arr.flatMap((row: any) => {
     return Array.from({ length: 12 }, (_, i) => {
       const idx = i + 1;
+      const caption = String(row?.caption ?? "");
       return {
         month: `${idx}월`,
         price: cleanNumber(row?.[`m${idx}`]),
         yyyy: String(row?.yyyy ?? ""),
-        caption: String(row?.caption ?? ""),
+        caption,
+        unit: normalizeUnit(row?.unit ?? row?.unitname ?? row?.qtyunit ?? row?.qtyunitname ?? extractUnitFromCaption(caption)),
       };
     });
   });
@@ -489,13 +515,13 @@ function KoreaPriceMap({
         <div className="grid gap-3 md:grid-cols-3">
           <CodeHint
             label="가장 저렴한 지역"
-            value={cheapest ? `${cheapest.region} · ${formatWon(cheapest.latestPrice)}` : "-"}
+            value={cheapest ? `${cheapest.region} · ${formatWon(cheapest.latestPrice, cheapest.unit)}` : "-"}
           />
           <CodeHint
             label="가장 비싼 지역"
-            value={highest ? `${highest.region} · ${formatWon(highest.latestPrice)}` : "-"}
+            value={highest ? `${highest.region} · ${formatWon(highest.latestPrice, highest.unit)}` : "-"}
           />
-          <CodeHint label="가격 표시 기준" value={prices.length ? "지역별 최신가" : "표시할 데이터 없음"} />
+          <CodeHint label="가격 표시 기준" value={prices.length ? `지역별 최신가${highest?.unit ? ` · ${highest.unit}` : ""}` : "표시할 데이터 없음"} />
         </div>
       </div>
     </div>
@@ -536,7 +562,7 @@ export default function KamisPriceDashboard() {
     itemCode: "",
     kindCode: "",
     productRankCode: "01",
-    convertKgYn: "Y",
+    convertKgYn: "N",
   });
 
   const [monthlyForm, setMonthlyForm] = useState({
@@ -573,6 +599,14 @@ export default function KamisPriceDashboard() {
     if (!selectedProductInfo) return "";
     return `${selectedProductInfo.itemcategoryname} · ${selectedProductInfo.itemname}${selectedProductInfo.kindname ? ` · ${selectedProductInfo.kindname}` : ""}`;
   }, [selectedProductInfo]);
+
+  const activeDisplayUnit = useMemo(() => {
+    if (mode === "daily") {
+      return normalizeUnit(dailyRows.find((row) => normalizeUnit(row.unit))?.unit);
+    }
+    return normalizeUnit(monthlyRows.find((row) => normalizeUnit(row.unit))?.unit);
+  }, [mode, dailyRows, monthlyRows]);
+
 
   const categoryOptions = useMemo(() => {
     const map = new Map<string, { value: string; label: string }>();
@@ -807,6 +841,7 @@ export default function KamisPriceDashboard() {
             region: getRegionKeyFromName(region.label),
             latestPrice: latest.price,
             latestDate: latest.regday,
+            unit: latest.unit,
           };
         })
       );
@@ -1557,19 +1592,19 @@ async function searchProducts() {
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
               <StatCard
                 title={mode === "daily" ? "최신 일별 가격" : "최신 월별 가격"}
-                value={formatWon(mode === "daily" ? dailySummary?.latest ?? 0 : monthlySummary?.latest ?? 0)}
+                value={formatWon(mode === "daily" ? dailySummary?.latest ?? 0 : monthlySummary?.latest ?? 0, activeDisplayUnit)}
               />
               <StatCard
                 title={mode === "daily" ? "평균 일별 가격" : "평균 월별 가격"}
-                value={formatWon(mode === "daily" ? dailySummary?.avg ?? 0 : monthlySummary?.avg ?? 0)}
+                value={formatWon(mode === "daily" ? dailySummary?.avg ?? 0 : monthlySummary?.avg ?? 0, activeDisplayUnit)}
               />
               <StatCard
                 title={mode === "daily" ? "최저 가격" : "최저 월별 가격"}
-                value={formatWon(mode === "daily" ? dailySummary?.min ?? 0 : monthlySummary?.min ?? 0)}
+                value={formatWon(mode === "daily" ? dailySummary?.min ?? 0 : monthlySummary?.min ?? 0, activeDisplayUnit)}
               />
               <StatCard
                 title={mode === "daily" ? "최고 가격" : "최고 월별 가격"}
-                value={formatWon(mode === "daily" ? dailySummary?.max ?? 0 : monthlySummary?.max ?? 0)}
+                value={formatWon(mode === "daily" ? dailySummary?.max ?? 0 : monthlySummary?.max ?? 0, activeDisplayUnit)}
               />
             </div>
 
@@ -1579,6 +1614,7 @@ async function searchProducts() {
                   <h3 className="text-xl font-bold">가격 추이 차트</h3>
                   <p className="mt-2 text-sm text-slate-600">
                     {selectedProductLabel || "선택 품목"} · {mode === "daily" ? "현재년도 vs 전년 동요일" : "현재년도 vs 전년 동월"}
+                    {activeDisplayUnit ? ` · 단위 ${activeDisplayUnit}` : ""}
                   </p>
                 </div>
 
@@ -1590,7 +1626,7 @@ async function searchProducts() {
                       <YAxis />
                       <Tooltip
                         formatter={(value, name) => [
-                          value ? formatWon(value) : "",
+                          value ? formatWon(value, activeDisplayUnit) : "",
                           name === "price" ? "현재년도" : mode === "daily" ? "전년 동요일" : "전년 동월",
                         ]}
                       />
@@ -1614,9 +1650,9 @@ async function searchProducts() {
                           <th className="px-3 py-2">일자</th>
                           <th className="px-3 py-2">품목</th>
                           <th className="px-3 py-2">지역</th>
-                          <th className="px-3 py-2">가격</th>
+                          <th className="px-3 py-2">가격{activeDisplayUnit ? ` (${activeDisplayUnit})` : ""}</th>
                           <th className="px-3 py-2">전년 동요일</th>
-                          <th className="px-3 py-2">전년 가격</th>
+                          <th className="px-3 py-2">전년 가격{activeDisplayUnit ? ` (${activeDisplayUnit})` : ""}</th>
                           <th className="px-3 py-2">등락률</th>
                         </tr>
                       </thead>
@@ -1628,9 +1664,9 @@ async function searchProducts() {
                               {row.itemname} {row.kindname ? `· ${row.kindname}` : ""}
                             </td>
                             <td className="px-3 py-2">{row.countyname || row.marketname || "-"}</td>
-                            <td className="px-3 py-2 font-semibold">{formatWon(row.price)}</td>
+                            <td className="px-3 py-2 font-semibold">{formatWon(row.price, row.unit)}</td>
                             <td className="px-3 py-2">{row.priorPrice === null ? "" : row.compareDate}</td>
-                            <td className="px-3 py-2">{row.priorPrice === null ? "" : formatWon(row.priorPrice)}</td>
+                            <td className="px-3 py-2">{row.priorPrice === null ? "" : formatWon(row.priorPrice, row.unit)}</td>
                             <td className={`px-3 py-2 font-semibold ${row.changeRate !== null && row.changeRate > 0 ? "text-rose-600" : row.changeRate !== null && row.changeRate < 0 ? "text-blue-600" : ""}`}>
                               {formatRate(row.changeRate)}
                             </td>
@@ -1643,9 +1679,9 @@ async function searchProducts() {
                       <thead className="sticky top-0 bg-white">
                         <tr className="border-b border-slate-200 text-left text-slate-500">
                           <th className="px-3 py-2">월</th>
-                          <th className="px-3 py-2">가격</th>
+                          <th className="px-3 py-2">가격{activeDisplayUnit ? ` (${activeDisplayUnit})` : ""}</th>
                           <th className="px-3 py-2">전년</th>
-                          <th className="px-3 py-2">전년 동월 가격</th>
+                          <th className="px-3 py-2">전년 동월 가격{activeDisplayUnit ? ` (${activeDisplayUnit})` : ""}</th>
                           <th className="px-3 py-2">등락률</th>
                         </tr>
                       </thead>
@@ -1653,9 +1689,9 @@ async function searchProducts() {
                         {monthlyComparisonRows.map((row, index) => (
                           <tr key={`${row.month}-${index}`} className="border-b border-slate-100">
                             <td className="px-3 py-2">{row.month}</td>
-                            <td className="px-3 py-2 font-semibold">{formatWon(row.price)}</td>
+                            <td className="px-3 py-2 font-semibold">{formatWon(row.price, row.unit)}</td>
                             <td className="px-3 py-2">{row.priorPrice === null ? "" : row.priorYear}</td>
-                            <td className="px-3 py-2">{row.priorPrice === null ? "" : formatWon(row.priorPrice)}</td>
+                            <td className="px-3 py-2">{row.priorPrice === null ? "" : formatWon(row.priorPrice, row.unit)}</td>
                             <td className={`px-3 py-2 font-semibold ${row.changeRate !== null && row.changeRate > 0 ? "text-rose-600" : row.changeRate !== null && row.changeRate < 0 ? "text-blue-600" : ""}`}>
                               {formatRate(row.changeRate)}
                             </td>
