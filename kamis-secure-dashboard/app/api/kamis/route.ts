@@ -23,18 +23,15 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const upstream = new URL(KAMIS_BASE_URL);
 
-    // 프론트에서 넘어온 일반 파라미터 복사
     searchParams.forEach((value, key) => {
       if (value !== "") {
         upstream.searchParams.set(key, value);
       }
     });
 
-    // 서버 환경변수로 인증값 강제 주입
     upstream.searchParams.set("p_cert_id", certId);
     upstream.searchParams.set("p_cert_key", certKey);
 
-    // 기본 응답타입 보정
     if (!upstream.searchParams.get("p_returntype")) {
       upstream.searchParams.set("p_returntype", "json");
     }
@@ -57,8 +54,6 @@ export async function GET(req: NextRequest) {
           ...json,
           _debug: {
             requestedUrl: upstream.toString().replace(certKey, "****"),
-            usedEnvCertId: true,
-            usedEnvCertKey: true,
             upstreamStatus: response.status,
           },
         },
