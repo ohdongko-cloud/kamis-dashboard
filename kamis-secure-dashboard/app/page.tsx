@@ -1,3 +1,5 @@
+===== app/page.tsx =====
+
 'use client';
 
 import React, { useEffect, useMemo, useState } from "react";
@@ -33,7 +35,7 @@ const STORAGE_KEYS = {
   presets: "kamis_user_presets",
 };
 
-const VERSION_LABEL = "2026년 04월 01일 09시 업데이트된 버전";
+const VERSION_LABEL = "2026년 04월 01일 10시 업데이트된 버전";
 
 const REGION_OPTIONS = [
   { label: "전체지역", value: "" },
@@ -102,7 +104,7 @@ const MONTHLY_GRADE_OPTIONS = [
 
 const BUILTIN_PRESETS = [
   {
-    label: "오징어 · 기본",
+    label: "수산물 · 기본",
     itemCategoryCode: "600",
     itemCode: "",
     kindCode: "",
@@ -111,8 +113,8 @@ const BUILTIN_PRESETS = [
     source: "기본",
   },
   {
-    label: "고등어 · 기본",
-    itemCategoryCode: "600",
+    label: "채소류 · 기본",
+    itemCategoryCode: "200",
     itemCode: "",
     kindCode: "",
     productRankCode: "01",
@@ -120,8 +122,8 @@ const BUILTIN_PRESETS = [
     source: "기본",
   },
   {
-    label: "갈치 · 기본",
-    itemCategoryCode: "600",
+    label: "축산물 · 기본",
+    itemCategoryCode: "500",
     itemCode: "",
     kindCode: "",
     productRankCode: "01",
@@ -538,7 +540,7 @@ export default function KamisPriceDashboard() {
   const [password, setPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [isUnlocked, setIsUnlocked] = useState(false);
-  const [productKeyword, setProductKeyword] = useState("수산");
+  const [productKeyword, setProductKeyword] = useState("");
   const [productOptions, setProductOptions] = useState<ProductInfoRow[]>([]);
   const [userPresets, setUserPresets] = useState<PresetRow[]>([]);
   const [newPresetName, setNewPresetName] = useState("");
@@ -574,6 +576,14 @@ export default function KamisPriceDashboard() {
 
   const allPresets = useMemo(() => [...BUILTIN_PRESETS, ...userPresets], [userPresets]);
 
+  const filteredProductOptions = useMemo(() => {
+    const keyword = productKeyword.trim().toLowerCase();
+    if (!keyword) return productOptions;
+    return productOptions.filter((item) =>
+      `${item.itemcategoryname} ${item.itemname} ${item.kindname}`.toLowerCase().includes(keyword)
+    );
+  }, [productOptions, productKeyword]);
+
   const selectedProductInfo = useMemo(() => {
     return productOptions.find(
       (item) =>
@@ -585,7 +595,7 @@ export default function KamisPriceDashboard() {
 
   const selectedProductLabel = useMemo(() => {
     if (!selectedProductInfo) return "";
-    return `${selectedProductInfo.itemname}${selectedProductInfo.kindname ? ` · ${selectedProductInfo.kindname}` : ""}`;
+    return `${selectedProductInfo.itemcategoryname} · ${selectedProductInfo.itemname}${selectedProductInfo.kindname ? ` · ${selectedProductInfo.kindname}` : ""}`;
   }, [selectedProductInfo]);
 
   const categoryOptions = useMemo(() => {
@@ -598,13 +608,24 @@ export default function KamisPriceDashboard() {
         });
       }
     });
-    const values = Array.from(map.values()).sort((a, b) => a.value.localeCompare(b.value));
-    return values.length ? values : [{ value: "600", label: "600 · 수산물" }];
+
+    const merged = [
+      ...Object.entries(CATEGORY_LABELS).map(([value, label]) => ({
+        value,
+        label: `${value} · ${label}`,
+      })),
+      ...Array.from(map.values()),
+    ];
+
+    const dedup = new Map<string, { value: string; label: string }>();
+    merged.forEach((item) => dedup.set(item.value, item));
+    return Array.from(dedup.values()).sort((a, b) => a.value.localeCompare(b.value));
   }, [productOptions]);
 
   const itemOptions = useMemo(() => {
+    const source = filteredProductOptions.length || productKeyword.trim() ? filteredProductOptions : productOptions;
     const map = new Map<string, { value: string; label: string }>();
-    productOptions
+    source
       .filter((item) => item.itemcategorycode === dailyForm.itemCategoryCode)
       .forEach((item) => {
         if (!map.has(item.itemcode)) {
@@ -615,11 +636,12 @@ export default function KamisPriceDashboard() {
         }
       });
     return Array.from(map.values()).sort((a, b) => a.value.localeCompare(b.value));
-  }, [productOptions, dailyForm.itemCategoryCode]);
+  }, [filteredProductOptions, productOptions, productKeyword, dailyForm.itemCategoryCode]);
 
   const kindOptions = useMemo(() => {
+    const source = filteredProductOptions.length || productKeyword.trim() ? filteredProductOptions : productOptions;
     const map = new Map<string, { value: string; label: string }>();
-    productOptions
+    source
       .filter(
         (item) =>
           item.itemcategorycode === dailyForm.itemCategoryCode &&
@@ -634,7 +656,7 @@ export default function KamisPriceDashboard() {
         }
       });
     return Array.from(map.values()).sort((a, b) => a.value.localeCompare(b.value));
-  }, [productOptions, dailyForm.itemCategoryCode, dailyForm.itemCode]);
+  }, [filteredProductOptions, productOptions, productKeyword, dailyForm.itemCategoryCode, dailyForm.itemCode]);
 
   const dailySummary = useMemo(() => {
     const prices = dailyRows.map((d) => d.price).filter((v) => v > 0);
@@ -735,99 +757,79 @@ export default function KamisPriceDashboard() {
   }
 
   async function searchProducts() {
-  setLoadingProducts(true);
-  setError("");
+    setLoadingProducts(true);
+    setError("");
 
-  try {
-    if (useMock) {
-      const mockProducts: ProductInfoRow[] = [
-        {
-          itemcategorycode: "600",
-          itemcategoryname: "수산물",
-          itemcode: "611",
-          itemname: "오징어",
-          kindcode: "01",
-          kindname: "냉동",
-        },
-        {
-          itemcategorycode: "600",
-          itemcategoryname: "수산물",
-          itemcode: "612",
-          itemname: "고등어",
-          kindcode: "01",
-          kindname: "국산",
-        },
-        {
-          itemcategorycode: "600",
-          itemcategoryname: "수산물",
-          itemcode: "613",
-          itemname: "갈치",
-          kindcode: "01",
-          kindname: "국산",
-        },
-        {
-          itemcategorycode: "600",
-          itemcategoryname: "수산물",
-          itemcode: "614",
-          itemname: "명태",
-          kindcode: "01",
-          kindname: "냉동",
-        },
-      ];
+    try {
+      if (useMock) {
+        const mockProducts: ProductInfoRow[] = [
+          { itemcategorycode: "100", itemcategoryname: "식량작물", itemcode: "111", itemname: "쌀", kindcode: "01", kindname: "일반계" },
+          { itemcategorycode: "200", itemcategoryname: "채소류", itemcode: "211", itemname: "배추", kindcode: "00", kindname: "기본품종" },
+          { itemcategorycode: "200", itemcategoryname: "채소류", itemcode: "231", itemname: "무", kindcode: "00", kindname: "기본품종" },
+          { itemcategorycode: "300", itemcategoryname: "특용작물", itemcode: "311", itemname: "참깨", kindcode: "00", kindname: "기본품종" },
+          { itemcategorycode: "400", itemcategoryname: "과일류", itemcode: "411", itemname: "사과", kindcode: "01", kindname: "후지" },
+          { itemcategorycode: "500", itemcategoryname: "축산물", itemcode: "511", itemname: "한우등심", kindcode: "01", kindname: "1등급" },
+          { itemcategorycode: "600", itemcategoryname: "수산물", itemcode: "611", itemname: "오징어", kindcode: "01", kindname: "냉동" },
+          { itemcategorycode: "600", itemcategoryname: "수산물", itemcode: "612", itemname: "고등어", kindcode: "01", kindname: "국산" },
+          { itemcategorycode: "600", itemcategoryname: "수산물", itemcode: "613", itemname: "갈치", kindcode: "01", kindname: "국산" },
+        ];
 
-      setProductOptions(mockProducts);
+        setProductOptions(mockProducts);
 
-      if (mockProducts[0]) {
-        syncFormsFromSelection(
-          mockProducts[0].itemcategorycode,
-          mockProducts[0].itemcode,
-          mockProducts[0].kindcode
-        );
+        if (mockProducts[0]) {
+          syncFormsFromSelection(
+            mockProducts[0].itemcategorycode,
+            mockProducts[0].itemcode,
+            mockProducts[0].kindcode
+          );
+        }
+
+        setStatusMessage(`Mock 전체 품목 리스트 ${mockProducts.length}건을 불러왔습니다.`);
+        return;
       }
 
-      setStatusMessage(`Mock 품목 코드표 ${mockProducts.length}건을 불러왔습니다.`);
-      return;
+      const query = buildQuery({
+        action: "productInfo",
+        p_cert_key: certKey,
+        p_cert_id: certId,
+        p_returntype: "json",
+      });
+
+      const response = await fetch(`/api/kamis?${query}`);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+      const json = await response.json();
+      const normalized = normalizeProductInfoResponse(json);
+
+      if (!normalized.length) {
+        openPopup("품목 코드 조회 오류", "KAMIS 전체 품목 리스트를 불러오지 못했습니다.");
+        return;
+      }
+
+      setProductOptions(normalized);
+
+      const currentCategory = dailyForm.itemCategoryCode || normalized[0].itemcategorycode;
+      const firstInCategory =
+        normalized.find((item) => item.itemcategorycode === currentCategory) ?? normalized[0];
+
+      syncFormsFromSelection(
+        firstInCategory.itemcategorycode,
+        firstInCategory.itemcode,
+        firstInCategory.kindcode
+      );
+
+      setStatusMessage(`KAMIS 전체 품목 리스트 ${normalized.length}건을 불러왔습니다.`);
+    } catch (e) {
+      const message =
+        e instanceof Error
+          ? `${e.message} — 품목 코드표 조회에 실패했습니다.`
+          : "품목 코드표 조회 중 오류가 발생했습니다.";
+      setError(message);
+      openPopup("품목 코드 조회 오류", message);
+    } finally {
+      setLoadingProducts(false);
     }
-
-    const query = buildQuery({
-      action: "productInfo",
-      p_cert_key: certKey,
-      p_cert_id: certId,
-      p_returntype: "json",
-    });
-
-    const response = await fetch(`/api/kamis?${query}`);
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-    const json = await response.json();
-    const normalized = normalizeProductInfoResponse(json);
-
-    const seafoodOnly = normalized.filter(
-      (item) => item.itemcategorycode === "600"
-    );
-
-    if (!seafoodOnly.length) {
-      openPopup("품목 코드 조회 오류", "수산물 품목 리스트를 불러오지 못했습니다.");
-      return;
-    }
-
-    setProductOptions(seafoodOnly);
-
-    const first = seafoodOnly[0];
-    syncFormsFromSelection(first.itemcategorycode, first.itemcode, first.kindcode);
-
-    setStatusMessage(`수산물 전체 품목 ${seafoodOnly.length}건을 불러왔습니다.`);
-  } catch (e) {
-    const message =
-      e instanceof Error
-        ? `${e.message} — 품목 코드표 조회에 실패했습니다.`
-        : "품목 코드표 조회 중 오류가 발생했습니다.";
-    setError(message);
-    openPopup("품목 코드 조회 오류", message);
-  } finally {
-    setLoadingProducts(false);
   }
-}
 
   async function loadRegionalLatestPrices() {
     setLoadingMap(true);
@@ -894,7 +896,13 @@ export default function KamisPriceDashboard() {
 
     try {
       if (useMock) {
-        setDailyRows(DAILY_MOCK);
+        setDailyRows(
+          DAILY_MOCK.map((row) => ({
+            ...row,
+            itemname: selectedProductInfo?.itemname || row.itemname,
+            kindname: selectedProductInfo?.kindname || row.kindname,
+          }))
+        );
         setStatusMessage("일별 조회 버튼이 정상 작동했습니다. 현재는 Mock 모드라 예시 일별 데이터를 다시 불러왔습니다.");
         await loadRegionalLatestPrices();
         return;
@@ -1020,23 +1028,48 @@ export default function KamisPriceDashboard() {
 
   useEffect(() => {
     searchProducts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    if (itemOptions.length > 0 && !itemOptions.some((i) => i.value === dailyForm.itemCode)) {
-      const first = itemOptions[0];
-      setDailyForm((prev) => ({ ...prev, itemCode: first.value }));
-      setMonthlyForm((prev) => ({ ...prev, itemCode: first.value }));
+    if (!productOptions.length) return;
+    const source = filteredProductOptions.length || productKeyword.trim() ? filteredProductOptions : productOptions;
+    const firstInCategory = source.find((item) => item.itemcategorycode === dailyForm.itemCategoryCode);
+
+    if (!firstInCategory) {
+      setDailyForm((prev) => ({ ...prev, itemCode: "", kindCode: "" }));
+      setMonthlyForm((prev) => ({ ...prev, itemCode: "", kindCode: "" }));
+      return;
     }
-  }, [itemOptions, dailyForm.itemCode]);
+
+    if (!source.some((item) => item.itemcategorycode === dailyForm.itemCategoryCode && item.itemcode === dailyForm.itemCode)) {
+      setDailyForm((prev) => ({ ...prev, itemCode: firstInCategory.itemcode, kindCode: firstInCategory.kindcode }));
+      setMonthlyForm((prev) => ({ ...prev, itemCode: firstInCategory.itemcode, kindCode: firstInCategory.kindcode }));
+    }
+  }, [productOptions, filteredProductOptions, productKeyword, dailyForm.itemCategoryCode, dailyForm.itemCode]);
 
   useEffect(() => {
-    if (kindOptions.length > 0 && !kindOptions.some((k) => k.value === dailyForm.kindCode)) {
-      const first = kindOptions[0];
-      setDailyForm((prev) => ({ ...prev, kindCode: first.value }));
-      setMonthlyForm((prev) => ({ ...prev, kindCode: first.value }));
+    const source = filteredProductOptions.length || productKeyword.trim() ? filteredProductOptions : productOptions;
+    const firstKind = source.find(
+      (item) =>
+        item.itemcategorycode === dailyForm.itemCategoryCode &&
+        item.itemcode === dailyForm.itemCode
+    );
+
+    if (!firstKind) return;
+
+    if (
+      !source.some(
+        (item) =>
+          item.itemcategorycode === dailyForm.itemCategoryCode &&
+          item.itemcode === dailyForm.itemCode &&
+          item.kindcode === dailyForm.kindCode
+      )
+    ) {
+      setDailyForm((prev) => ({ ...prev, kindCode: firstKind.kindcode }));
+      setMonthlyForm((prev) => ({ ...prev, kindCode: firstKind.kindcode }));
     }
-  }, [kindOptions, dailyForm.kindCode]);
+  }, [filteredProductOptions, productOptions, productKeyword, dailyForm.itemCategoryCode, dailyForm.itemCode, dailyForm.kindCode]);
 
   const activeChartData =
     mode === "daily"
@@ -1059,10 +1092,10 @@ export default function KamisPriceDashboard() {
               <div className="text-xs font-semibold tracking-wide text-slate-500">{VERSION_LABEL}</div>
               <h1 className="mt-2 flex items-center gap-2 text-3xl font-bold tracking-tight">
                 <Fish className="h-7 w-7" />
-                KAMIS API 수산물 가격 대시보드
+                KAMIS API 통합 가격 대시보드
               </h1>
               <p className="mt-2 text-sm text-slate-600">
-                드롭다운 기반 품목 선택 · 일별/월별 조회 · 차트 · 지역 가격 지도까지 한 번에 보는 최종 버전
+                농산물 · 축산물 · 수산물 전체 품목 드롭다운 조회 · 일별/월별 조회 · 차트 · 지역 가격 지도
               </p>
             </div>
 
@@ -1168,22 +1201,22 @@ export default function KamisPriceDashboard() {
                       ) : (
                         <RefreshCw className="mr-2 h-4 w-4" />
                       )}
-                      품목 코드 새로 조회
+                      전체 품목 불러오기
                     </button>
                   </div>
 
                   <div>
-                    <label className={labelStyle()}>품목 검색 키워드</label>
+                    <label className={labelStyle()}>품목 필터 키워드</label>
                     <div className="flex gap-3">
                       <input
                         className={inputStyle()}
                         value={productKeyword}
                         onChange={(e) => setProductKeyword(e.target.value)}
-                        placeholder="예: 수산, 오징어, 갈치"
+                        placeholder="예: 오징어, 배추, 사과, 한우"
                       />
-                      <button className={primaryButtonStyle(false)} onClick={searchProducts} disabled={loadingProducts}>
+                      <button className={primaryButtonStyle(false)} onClick={() => setProductKeyword(productKeyword)}>
                         <Search className="mr-2 h-4 w-4" />
-                        검색
+                        필터
                       </button>
                     </div>
                   </div>
@@ -1194,7 +1227,10 @@ export default function KamisPriceDashboard() {
                       <select
                         className={inputStyle()}
                         value={dailyForm.itemCategoryCode}
-                        onChange={(e) => syncFormsFromSelection(e.target.value, "", "")}
+                        onChange={(e) => {
+                          setDailyForm((prev) => ({ ...prev, itemCategoryCode: e.target.value, itemCode: "", kindCode: "" }));
+                          setMonthlyForm((prev) => ({ ...prev, itemCategoryCode: e.target.value, itemCode: "", kindCode: "" }));
+                        }}
                       >
                         {categoryOptions.map((option) => (
                           <option key={option.value} value={option.value}>
@@ -1262,7 +1298,7 @@ export default function KamisPriceDashboard() {
                           className={inputStyle()}
                           value={newPresetName}
                           onChange={(e) => setNewPresetName(e.target.value)}
-                          placeholder="예: 냉동오징어 서울"
+                          placeholder="예: 채소류 서울 상품"
                         />
                         <button className={secondaryButtonStyle()} onClick={saveCurrentPreset}>
                           저장
@@ -1514,4 +1550,58 @@ export default function KamisPriceDashboard() {
   );
 }
 
+
+===== app/api/kamis/route.ts =====
+
+import { NextRequest, NextResponse } from "next/server";
+
+const KAMIS_BASE_URL = "https://www.kamis.or.kr/service/price/xml.do";
+
+export async function GET(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+
+    const upstream = new URL(KAMIS_BASE_URL);
+
+    searchParams.forEach((value, key) => {
+      if (value !== "") upstream.searchParams.set(key, value);
+    });
+
+    if (!upstream.searchParams.get("p_returntype")) {
+      upstream.searchParams.set("p_returntype", "json");
+    }
+
+    const response = await fetch(upstream.toString(), {
+      method: "GET",
+      cache: "no-store",
+      headers: {
+        Accept: "application/json, text/plain, */*",
+      },
+    });
+
+    const text = await response.text();
+
+    try {
+      const json = JSON.parse(text);
+      return NextResponse.json(json, { status: response.status });
+    } catch {
+      return NextResponse.json(
+        {
+          error: "KAMIS 응답을 JSON으로 파싱하지 못했습니다.",
+          status: response.status,
+          raw: text,
+          requestedUrl: upstream.toString(),
+        },
+        { status: 502 }
+      );
+    }
+  } catch (error) {
+    return NextResponse.json(
+      {
+        error: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 }
+    );
+  }
+}
 
