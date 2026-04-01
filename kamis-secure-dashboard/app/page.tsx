@@ -498,7 +498,7 @@ export default function KamisPriceDashboard() {
   const [mode, setMode] = useState<"daily" | "monthly">("daily");
   const [certKey, setCertKey] = useState("");
   const [certId, setCertId] = useState("");
-  const [useMock, setUseMock] = useState(true);
+  const [useMock, setUseMock] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingProducts, setLoadingProducts] = useState(false);
   const [loadingMap, setLoadingMap] = useState(false);
