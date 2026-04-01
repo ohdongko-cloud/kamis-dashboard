@@ -290,23 +290,31 @@ function normalizeMonthlyResponse(json: any): MonthlyRow[] {
 }
 
 function normalizeProductInfoResponse(json: any): ProductInfoRow[] {
-  const root = json?.price ?? json?.data ?? json;
-  const items = root?.item ?? root ?? [];
-  const arr = Array.isArray(items) ? items : [items];
+  const root =
+    json?.info ??
+    json?.price ??
+    json?.data?.item ??
+    json?.data ??
+    json?.item ??
+    json;
+
+  const arr = Array.isArray(root) ? root : [root];
 
   return arr
     .filter(Boolean)
     .map((row: any) => ({
-      itemcategorycode: String(row?.itemcategorycode ?? ""),
+      itemcategorycode: String(row?.itemcategorycode ?? "").trim(),
       itemcategoryname: String(
-        row?.itemcategoryname ?? CATEGORY_LABELS[String(row?.itemcategorycode ?? "")] ?? ""
-      ),
-      itemcode: String(row?.itemcode ?? ""),
-      itemname: String(row?.itemname ?? ""),
-      kindcode: String(row?.kindcode ?? ""),
-      kindname: String(row?.kindname ?? ""),
+        row?.itemcategoryname ??
+          CATEGORY_LABELS[String(row?.itemcategorycode ?? "")] ??
+          ""
+      ).trim(),
+      itemcode: String(row?.itemcode ?? "").trim(),
+      itemname: String(row?.itemname ?? "").trim(),
+      kindcode: String(row?.kindcode ?? "00").trim(),
+      kindname: String(row?.kindname ?? "기본품종").trim(),
     }))
-    .filter((row) => Boolean(row.itemcode));
+    .filter((row) => Boolean(row.itemcategorycode && row.itemcode && row.itemname));
 }
 
 function getRegionKeyFromName(name: string) {
@@ -791,6 +799,8 @@ export default function KamisPriceDashboard() {
           if (!response.ok) return null;
 
           const json = await response.json();
+          console.log("productInfo raw response:", json);
+          console.log("normalized product rows:", normalized.length, normalized.slice(0, 5));
           const rows = normalizeDailyResponse(json).filter((row) => row.price > 0);
           if (!rows.length) return null;
 
