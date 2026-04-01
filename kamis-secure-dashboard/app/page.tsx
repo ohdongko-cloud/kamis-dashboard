@@ -735,95 +735,99 @@ export default function KamisPriceDashboard() {
   }
 
   async function searchProducts() {
-    setLoadingProducts(true);
-    setError("");
+  setLoadingProducts(true);
+  setError("");
 
-    try {
-      if (useMock) {
-        const mockProducts: ProductInfoRow[] = [
-          {
-            itemcategorycode: "600",
-            itemcategoryname: "수산물",
-            itemcode: "611",
-            itemname: "오징어",
-            kindcode: "01",
-            kindname: "냉동",
-          },
-          {
-            itemcategorycode: "600",
-            itemcategoryname: "수산물",
-            itemcode: "612",
-            itemname: "고등어",
-            kindcode: "01",
-            kindname: "국산",
-          },
-          {
-            itemcategorycode: "600",
-            itemcategoryname: "수산물",
-            itemcode: "613",
-            itemname: "갈치",
-            kindcode: "01",
-            kindname: "국산",
-          },
-          {
-            itemcategorycode: "600",
-            itemcategoryname: "수산물",
-            itemcode: "614",
-            itemname: "명태",
-            kindcode: "01",
-            kindname: "냉동",
-          },
-        ];
-        const keyword = productKeyword.trim().toLowerCase();
-        const filtered = mockProducts.filter((item) =>
-          `${item.itemcategoryname} ${item.itemname} ${item.kindname}`.toLowerCase().includes(keyword)
+  try {
+    if (useMock) {
+      const mockProducts: ProductInfoRow[] = [
+        {
+          itemcategorycode: "600",
+          itemcategoryname: "수산물",
+          itemcode: "611",
+          itemname: "오징어",
+          kindcode: "01",
+          kindname: "냉동",
+        },
+        {
+          itemcategorycode: "600",
+          itemcategoryname: "수산물",
+          itemcode: "612",
+          itemname: "고등어",
+          kindcode: "01",
+          kindname: "국산",
+        },
+        {
+          itemcategorycode: "600",
+          itemcategoryname: "수산물",
+          itemcode: "613",
+          itemname: "갈치",
+          kindcode: "01",
+          kindname: "국산",
+        },
+        {
+          itemcategorycode: "600",
+          itemcategoryname: "수산물",
+          itemcode: "614",
+          itemname: "명태",
+          kindcode: "01",
+          kindname: "냉동",
+        },
+      ];
+
+      setProductOptions(mockProducts);
+
+      if (mockProducts[0]) {
+        syncFormsFromSelection(
+          mockProducts[0].itemcategorycode,
+          mockProducts[0].itemcode,
+          mockProducts[0].kindcode
         );
-        setProductOptions(filtered);
-        if (filtered[0]) {
-          syncFormsFromSelection(filtered[0].itemcategorycode, filtered[0].itemcode, filtered[0].kindcode);
-        }
-        setStatusMessage(`Mock 품목 코드표에서 ${filtered.length}건을 찾았습니다.`);
-        return;
       }
 
-      const query = buildQuery({
-        action: "productInfo",
-        p_cert_key: certKey,
-        p_cert_id: certId,
-        p_returntype: "json",
-      });
-
-      const response = await fetch(`/api/kamis?${query}`);
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-      const json = await response.json();
-      const normalized = normalizeProductInfoResponse(json);
-      const keyword = productKeyword.trim().toLowerCase();
-
-      const filtered = normalized.filter((item) =>
-        `${item.itemcategoryname} ${item.itemname} ${item.kindname}`.toLowerCase().includes(keyword)
-      );
-
-      setProductOptions(filtered.slice(0, 300));
-      setStatusMessage(`품목 코드표에서 ${filtered.length}건을 찾았습니다. 드롭다운에서 바로 선택할 수 있습니다.`);
-
-      if (filtered.length > 0) {
-        const first = filtered[0];
-        syncFormsFromSelection(first.itemcategorycode, first.itemcode, first.kindcode);
-      } else {
-        openPopup("품목 검색 결과 없음", `"${productKeyword}" 키워드로 찾은 품목이 없습니다.`);
-      }
-    } catch (e) {
-      const message =
-        e instanceof Error
-          ? `${e.message} — 품목 코드표 조회에 실패했습니다.`
-          : "품목 코드표 조회 중 오류가 발생했습니다.";
-      setError(message);
-      openPopup("품목 코드 조회 오류", message);
-    } finally {
-      setLoadingProducts(false);
+      setStatusMessage(`Mock 품목 코드표 ${mockProducts.length}건을 불러왔습니다.`);
+      return;
     }
+
+    const query = buildQuery({
+      action: "productInfo",
+      p_cert_key: certKey,
+      p_cert_id: certId,
+      p_returntype: "json",
+    });
+
+    const response = await fetch(`/api/kamis?${query}`);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+    const json = await response.json();
+    const normalized = normalizeProductInfoResponse(json);
+
+    const seafoodOnly = normalized.filter(
+      (item) => item.itemcategorycode === "600"
+    );
+
+    if (!seafoodOnly.length) {
+      openPopup("품목 코드 조회 오류", "수산물 품목 리스트를 불러오지 못했습니다.");
+      return;
+    }
+
+    setProductOptions(seafoodOnly);
+
+    const first = seafoodOnly[0];
+    syncFormsFromSelection(first.itemcategorycode, first.itemcode, first.kindcode);
+
+    setStatusMessage(`수산물 전체 품목 ${seafoodOnly.length}건을 불러왔습니다.`);
+  } catch (e) {
+    const message =
+      e instanceof Error
+        ? `${e.message} — 품목 코드표 조회에 실패했습니다.`
+        : "품목 코드표 조회 중 오류가 발생했습니다.";
+    setError(message);
+    openPopup("품목 코드 조회 오류", message);
+  } finally {
+    setLoadingProducts(false);
   }
+}
 
   async function loadRegionalLatestPrices() {
     setLoadingMap(true);
